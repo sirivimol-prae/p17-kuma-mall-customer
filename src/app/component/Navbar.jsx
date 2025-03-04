@@ -1,0 +1,198 @@
+'use client'
+
+import React, { useState } from 'react';
+import { Search, User, History, ShoppingCart, ChevronDown, Menu, X } from 'lucide-react';
+import Link from 'next/link';
+
+const Navbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  return (
+    <>
+        {/* Desktop Navigation (>1024px) */}
+        <nav className="hidden lg:block" style={{marginTop:"10px", marginBottom:"40px"}}>
+            <div style={{marginLeft: "75px", marginRight: "75px"}}>
+                <div className='flex w-full justify-end gap-2' style={{marginBottom:"10px",gap:"20px"}}>
+                    <div>English</div>
+                    <div>ติดต่อ KUMAま</div>
+                    <div className='flex items-center gap-1'>
+                        <User className="w-4 h-4" />
+                        <span>ผู้ใช้ XXXXXX</span>
+                    </div>
+                    <div className='bg-[#D6A985] px-10 py-[1px] rounded-[7px] text-white'>KUMAま FRIEND</div>
+                    <div>|</div>
+                    <div className='flex items-center gap-1'>
+                        <img src="/images/kumacoin.png" alt='kumacoin' className='w-6 h-auto'/>
+                        <span>50 Coin</span>
+                    </div>
+                </div>
+
+                <div className='flex justify-between items-center' style={{marginBottom:"10px"}}>
+                    <div className='flex items-center' style={{gap:"60px"}}>
+                        <Link href="/" className='w-10 h-auto'>
+                            <img src="/images/logo.png" alt="logo" />
+                        </Link>
+
+                        <div>สินค้าทั้งหมด</div>
+
+                        <div className='flex items-center gap-1'>
+                            <span>สินค้า</span>
+                            <ChevronDown className="w-4 h-4" />
+                        </div>
+                        <Link href="/flashsale" className='flex items-center gap-1 cursor-pointer'>
+                            <span>โปรโมชั่น</span>
+                            <ChevronDown className="w-4 h-4" />
+                        </Link>
+                        <Link href="/article" className='flex items-center gap-1 cursor-pointer'>
+                            <span>บทความ</span>
+                            <ChevronDown className="w-4 h-4" />
+                        </Link>
+                    </div>
+
+                    <div className='flex items-center' style={{gap:"30px"}}>
+                        <div className='flex'>
+                            <input
+                                type="text"
+                                placeholder="ค้นหาสินค้า"
+                                className=""
+                                style={{border:"1px solid #A6A6A6", padding:"2px 20px", borderRadius:"25px 0px 0px 25px", width:"375px"}}
+                            />
+                            <div style={{border:"1px solid #A6A6A6", padding:"2px 10px", borderRadius:"0px 25px 25px 0px", backgroundColor:"#D6A985"}} >
+                                <Search style={{width:"21px", height:"auto", color:'white'}}/>
+                            </div>
+                        </div>
+                        <History className="w-6 h-6" />
+                        <ShoppingCart className="w-6 h-6" />
+                    </div>
+                </div>
+            </div>
+            <div className="border-b border-[#D9D9D9] mb-5"></div>
+        </nav>
+
+        {/* Tablet Navigation (768px - 1024px) */}
+        <nav className="hidden md:block lg:hidden">
+            <div className="px-4 py-2">
+            <div className="flex justify-between items-center">
+                <Link href="/" className="w-10">
+                <img src="/images/logo.png" alt="logo" className="w-full h-auto" />
+                </Link>
+
+                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    <span className="text-sm">ผู้ใช้ XXXXXX</span>
+                </div>
+                <div className="flex items-center gap-2">
+                <img src="/images/kumacoin.png" className="w-6 h-6" />
+                    <span className="text-sm">50 Coin</span>
+                </div>
+                <History className="w-6 h-6" />
+                <ShoppingCart className="w-6 h-6" />
+                </div>
+            </div>
+
+            {/* Tablet Search */}
+            <div className="mt-4">
+                <div className="flex">
+                <input
+                    type="text"
+                    placeholder="ค้นหาสินค้า"
+                    className="flex-1 border border-[#A6A6A6] px-4 py-1 rounded-l-full"
+                />
+                <div className="border border-[#A6A6A6] px-3 py-1 rounded-r-full bg-[#D6A985]">
+                    <Search className="w-5 h-5 text-white" />
+                </div>
+                </div>
+            </div>
+
+            {/* Tablet Menu */}
+            <div className="mt-4 flex justify-center items-center gap-8">
+                <div>สินค้าทั้งหมด</div>
+                <div className="flex items-center gap-1">
+                <span>สินค้า</span>
+                <ChevronDown className="w-4 h-4" />
+                </div>
+                <Link href="/flashsale" className="flex items-center gap-1">
+                <span>โปรโมชั่น</span>
+                <ChevronDown className="w-4 h-4" />
+                </Link>
+                <Link href="/article" className="flex items-center gap-1" />
+                <span>บทความ</span>
+                <ChevronDown className="w-4 h-4" />
+                <div>ติดต่อ KUMAま</div>
+            </div>
+            </div>
+            <div className="border-b border-[#D9D9D9] mt-4"></div>
+        </nav>
+
+        {/* Mobile Navigation (<768px) */}
+        <nav className="block md:hidden">
+            <div className="px-4 py-2">
+            <div className="flex justify-between items-center">
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                {isMobileMenuOpen ? (
+                    <X className="w-6 h-6" />
+                ) : (
+                    <Menu className="w-6 h-6" />
+                )}
+                </button>
+                
+                <Link href="/" className="w-8">
+                <img src="/images/logo.png" alt="logo" className="w-full h-auto" />
+                </Link>
+
+                <div className="flex items-center gap-4">
+                <History className="w-6 h-6" />
+                <ShoppingCart className="w-6 h-6" />
+                </div>
+            </div>
+
+            {/* Mobile Search */}
+            <div className="mt-4">
+                <div className="flex">
+                <input
+                    type="text"
+                    placeholder="ค้นหาสินค้า"
+                    className="flex-1 border border-[#A6A6A6] px-4 py-1 rounded-l-full"
+                />
+                <div className="border border-[#A6A6A6] px-3 py-1 rounded-r-full bg-[#D6A985]">
+                    <Search className="w-5 h-5 text-white" />
+                </div>
+                </div>
+            </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+                <div className="mt-4 bg-white">
+                <div className="flex items-center gap-2 py-3 border-b border-[#D9D9D9]">
+                    <User className="w-5 h-5" />
+                    <span>ผู้ใช้ XXXXXX</span>
+                </div>
+                <div className="flex items-center gap-2 py-3 border-b border-[#D9D9D9]">
+                    <img src="/images/kumacoin.png" alt="kumacoin" className="w-6 h-6" />
+                    <span>50 Coin</span>
+                </div>
+                <div className="py-3 border-b border-[#D9D9D9]">English</div>
+                <div className="py-3 border-b border-[#D9D9D9]">สินค้าทั้งหมด</div>
+                <div className="py-3 border-b border-[#D9D9D9]">สินค้า</div>
+                <Link href="/flashsale" className="block py-3 border-b border-[#D9D9D9]">
+                    โปรโมชั่น
+                </Link>
+                <div className="py-3 border-b border-[#D9D9D9]">บทความ</div>
+                <Link href="/article" className="block py-3 border-b border-[#D9D9D9]">
+                    บทความ
+                </Link>
+                <div className="py-3 border-b border-[#D9D9D9]">ติดต่อ KUMAま</div>
+                <div className="mt-4 py-2 text-center bg-[#D6A985] text-white rounded-lg">
+                    KUMAま FRIEND
+                </div>
+                </div>
+            )}
+            </div>
+            <div className="border-b border-[#D9D9D9] mt-4"></div>
+        </nav>
+        </>
+    );
+};
+
+export default Navbar;
