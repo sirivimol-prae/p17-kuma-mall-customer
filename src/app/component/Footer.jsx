@@ -63,9 +63,9 @@ const Footer = () => {
           <div className="space-y-3">
             <h3 className="text-[20px] font-medium">คำสั่งซื้อของฉัน</h3>
             <ul className="space-y-1">
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">คำสั่งซื้อสินค้า</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">การชำระเงิน</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">สถานะการจัดส่ง</Link></li>
+              <li><Link href="/account/myorder?tab=all" className="text-[16px] hover:underline leading-tight">คำสั่งซื้อสินค้า</Link></li>
+              <li><Link href="/account/myorder?tab=payment" className="text-[16px] hover:underline leading-tight">การชำระเงิน</Link></li>
+              <li><Link href="/account/myorder?tab=shipping" className="text-[16px] hover:underline leading-tight">สถานะการจัดส่ง</Link></li>
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">นโยบายการเปลี่ยน/คืนสินค้า</Link></li>
             </ul>
           </div>
@@ -75,8 +75,8 @@ const Footer = () => {
             <ul className="space-y-1">
               <li><Link href="/account" className="text-[16px] hover:underline leading-tight">บัญชีของฉัน</Link></li>
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">การสมัครสมาชิก</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">สิทธิประโยชน์สมาชิก</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">KUMA ま Coin ของฉัน</Link></li>
+              <li><Link href="/account/member" className="text-[16px] hover:underline leading-tight">สิทธิประโยชน์สมาชิก</Link></li>
+              <li><Link href="/account/mycoin" className="text-[16px] hover:underline leading-tight">KUMA ま Coin ของฉัน</Link></li>
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">คูปองส่วนลดของฉัน</Link></li>
             </ul>
           </div>
@@ -85,7 +85,7 @@ const Footer = () => {
             <h3 className="text-[20px] font-medium">โปรโมชั่นสินค้า</h3>
             <ul className="space-y-1">
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">สินค้าเข้าใหม่</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">Flash Sale!</Link></li>
+              <li><Link href="/flashsale" className="text-[16px] hover:underline leading-tight">Flash Sale!</Link></li>
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">โบนัสสินค้าลดราคา</Link></li>
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">กล่องสุ่ม/Box Set</Link></li>
             </ul>

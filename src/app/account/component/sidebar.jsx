@@ -13,12 +13,12 @@ const SidebarAccount = () => {
             </a>
           </div>
           <div className="py-2">
-            <a href="/myaddress" className="text-gray-600 hover:text-[#D6A985] flex items-center">
+            <a href="/account/myaddress" className="text-gray-600 hover:text-[#D6A985] flex items-center">
               <span className="text-[#D6A985] mr-1">›</span> จัดการที่อยู่จัดส่ง
             </a>
           </div>
           <div className="py-2">
-            <a href="/mytax" className="text-gray-600 hover:text-[#D6A985] flex items-center">
+            <a href="/account/mytax" className="text-gray-600 hover:text-[#D6A985] flex items-center">
               <span className="text-[#D6A985] mr-1">›</span> จัดการใบกำกับภาษี
             </a>
           </div>
@@ -30,7 +30,7 @@ const SidebarAccount = () => {
         <h2 className="text-gray-700 font-medium text-lg mb-2">การซื้อของฉัน</h2>
         <div className="border-t border-gray-200">
           <div className="py-2">
-            <a href="#" className="text-gray-600 hover:text-[#D6A985] flex items-center">
+            <a href="/account/myorder" className="text-gray-600 hover:text-[#D6A985] flex items-center">
               <span className="text-[#D6A985] mr-1">›</span> คำสั่งซื้อของฉัน
             </a>
           </div>
@@ -42,12 +42,12 @@ const SidebarAccount = () => {
         <h2 className="text-gray-700 font-medium text-lg mb-2">สมาชิกและสิทธิประโยชน์</h2>
         <div className="border-t border-gray-200">
           <div className="py-2">
-            <a href="#" className="text-gray-600 hover:text-[#D6A985] flex items-center">
+            <a href="/account/member" className="text-gray-600 hover:text-[#D6A985] flex items-center">
               <span className="text-[#D6A985] mr-1">›</span> สถานะสมาชิกและสิทธิประโยชน์
             </a>
           </div>
           <div className="py-2">
-            <a href="#" className="text-gray-600 hover:text-[#D6A985] flex items-center">
+            <a href="/account/mycoin" className="text-gray-600 hover:text-[#D6A985] flex items-center">
               <span className="text-[#D6A985] mr-1">›</span> KUMAま Coin ของฉัน
             </a>
           </div>

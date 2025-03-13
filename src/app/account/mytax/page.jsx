@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link';
 import { ArrowLeft, X } from 'lucide-react'
-import AccountSidebar from '../account/component/sidebar';
+import AccountSidebar from '../component/sidebar';
 
 export default function Page() {
   // สถานะสำหรับที่อยู่
@@ -65,10 +65,11 @@ export default function Page() {
 
   const handleCheckboxChange = (selected) => {
     setNewInvoice({
-      useAsDefault: selected === "useAsDefault",
-      useForShipping: selected === "useForShipping",
+      ...newInvoice, // รักษาค่าของข้อมูลอื่นๆ ไว้
+      useAsDefault: selected === "useAsDefault" ? !newInvoice.useAsDefault : false,
+      useForShipping: selected === "useForShipping" ? !newInvoice.useForShipping : false
     });
-  };  
+  };
 
   return (
     <div className="relative">
@@ -88,7 +89,7 @@ export default function Page() {
               <div className="flex items-center pb-4 mb-6 border-b border-gray-100">
                 <div className="w-10 h-10 rounded-full bg-[#D6A985] flex items-center justify-center mr-4">
                   <img 
-                    src="./images/Paw_icon.png" 
+                    src="/images/paw_icon.png" 
                     alt="Paw_icon" 
                   />
                 </div>
@@ -260,7 +261,7 @@ export default function Page() {
         {/* Modal เพิ่มข้อมูลใบกำกับภาษี */}
         {showAddModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto py-6">
-                <div className="bg-white rounded-lg w-full max-w-2xl p-6 relative mx-auto my-4 max-h-[90vh] overflow-y-auto">
+                <div className="bg-white rounded-[10px] w-full max-w-2xl p-6 relative mx-auto my-4 max-h-[90vh] overflow-y-auto">
                 <button 
                     onClick={handleCloseModal} 
                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -410,7 +411,7 @@ export default function Page() {
                     onChange={() => handleCheckboxChange("useAsDefault")}
                     className="sr-only"
                     />
-                    <div className="w-4 h-4 border border-[#5F6368] rounded-[2px] mr-3 flex items-center justify-center">
+                    <div className="w-4 h-4 border-[2px] border-[#5F6368] mr-3 flex items-center justify-center">
                     {newInvoice.useAsDefault && (
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#D6A985]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -429,7 +430,7 @@ export default function Page() {
                     onChange={() => handleCheckboxChange("useForShipping")}
                     className="sr-only"
                     />
-                    <div className="w-4 h-4 border border-[#5F6368] rounded-[2px] mr-3 flex items-center justify-center">
+                    <div className="w-4 h-4 border-[2px] border-[#5F6368] mr-3 flex items-center justify-center">
                     {newInvoice.useForShipping && (
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#D6A985]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -443,13 +444,13 @@ export default function Page() {
                 <div className="flex gap-4 justify-end">
                     <button 
                     onClick={handleCloseModal}
-                    className="px-6 py-3 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100"
+                    className="w-[180px] h-[50px] border border-gray-300 rounded-[10px] text-[#A6A6A6] hover:bg-gray-100 text-[18px]"
                     >
                     ยกเลิก
                     </button>
                     <button 
                     onClick={handleSaveInvoice}
-                    className="px-6 py-3 bg-[#D6A985] text-white rounded-lg hover:bg-[#c49976]"
+                    className="w-[180px] h-[50px] bg-[#D6A985] text-white rounded-[10px] hover:bg-[#c49976] text-[18px]"
                     >
                     ยืนยันที่อยู่จัดส่ง
                     </button>

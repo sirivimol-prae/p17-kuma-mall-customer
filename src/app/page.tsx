@@ -1,7 +1,7 @@
 export default function Page() {
   return (
     <main>
-      <h1 style={{textAlign: "center"}}>Yes Mam!</h1>
+      <h1 style={{textAlign: "center"}}>Welcome! to Kuma Mall</h1>
     </main>
   )
 }
