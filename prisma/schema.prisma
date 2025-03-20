@@ -1,5 +1,3 @@
-//create: npx prisma migrate dev --name init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,213 +7,110 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-//<<----------------------Products---------------------->>//
-//   _____                       _                   _          
-//  |  __ \                     | |                 | |         
-//  | |__) |  _ __    ___     __| |  _   _    ___  | |_   ___  
-//  |  ___/  | '__|  / _ \   / _` | | | | |  / __| | __| / __| 
-//  | |      | |    | (_) | | (_| | | |_| | | (__  | |_  \__ \ 
-//  |_|      |_|     \___/   \__,_|  \__,_|  \___|  \__| |___/ 
-//<<----------------------Products---------------------->>//
- 
-// schema.prisma
-
 model product {
-  id                  Int               @id @default(autoincrement())
-  uuid                String            @default(uuid())
-  create_Date         DateTime          @default(now())
-  sku                 String            @unique
-  name_sku            String            @default("")
-  quantity            Int               @default(0)
-  make_price          Int?        
-  price_origin        Int         
-  product_width       Int?        
-  product_length      Int?        
-  product_heigth      Int?
-  product_weight      Int?
-  img_url             String?
-  update_date         DateTime          @updatedAt
-
-  flash_sale          flash_sale?  
-  product_group       product_to_group[] 
-  group_name          String            @db.Text @default("") 
+  id             Int                @id @default(autoincrement())
+  uuid           String             @default(uuid())
+  create_Date    DateTime           @default(now())
+  sku            String             @unique
+  name_sku       String             @default("")
+  quantity       Int                @default(0)
+  make_price     Int?
+  price_origin   Int
+  product_width  Int?
+  product_length Int?
+  product_heigth Int?
+  product_weight Int?
+  update_date    DateTime           @updatedAt
+  group_name     String             @default("")
+  size           String?
+  flash_sale     flash_sale?
+  img_product    img_product?
+  product_group  product_to_group[]
 }
 
 model group_product {
-  id                  Int               @id @default(autoincrement())
-  uuid                String            @default(uuid())
-  create_Date         DateTime          @default(now())
-  group_name          String            @db.Text @default("")
-  main_img_url        String[]          @default([]) 
-  description         String            @db.Text @default("")
-  
-  products            product_to_group[] 
+  id                  Int                   @id @default(autoincrement())
+  uuid                String                @default(uuid())
+  create_Date         DateTime              @default(now())
+  group_name          String                @default("")
+  subname             String                @default("")
   group_categories    group_to_category[]
   group_collections   group_to_collection[]
+  img_group_product   img_group_product?
+  product_description product_description?
+  products            product_to_group[]
 }
 
 model category {
-  id              Int         @id @default(autoincrement())
-  uuid            String      @default(uuid())
-  create_Date     DateTime    @default(now())
-  name            String      @unique
-  description     String?     @db.Text
-  
-  groups          group_to_category[]
+  id               Int                 @id @default(autoincrement())
+  uuid             String              @default(uuid())
+  create_Date      DateTime            @default(now())
+  name             String              @unique
+  description      String?
+  img_url_category String?
+  groups           group_to_category[]
 }
 
 model collection {
-  id              Int         @id @default(autoincrement())
-  uuid            String      @default(uuid())
-  create_Date     DateTime    @default(now())
-  name            String      @unique
-  description     String?     @db.Text
-  
-  groups          group_to_collection[]
+  id                 Int                   @id @default(autoincrement())
+  uuid               String                @default(uuid())
+  create_Date        DateTime              @default(now())
+  name               String                @unique
+  description        String?
+  img_url_collection String?
+  groups             group_to_collection[]
 }
 
 model product_to_group {
-  product_id      Int
-  group_id        Int
-  
-  product         product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  group           group_product   @relation(fields: [group_id], references: [id])
-  
+  product_id Int
+  group_id   Int
+  group      group_product @relation(fields: [group_id], references: [id])
+  product    product       @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
   @@id([product_id, group_id])
   @@index([product_id])
   @@index([group_id])
 }
 
 model group_to_category {
-  group_id      Int
-  category_id   Int
-  
-  group         group_product  @relation(fields: [group_id], references: [id], onDelete: Cascade)
-  category      category       @relation(fields: [category_id], references: [id])
-  
+  group_id    Int
+  category_id Int
+  category    category      @relation(fields: [category_id], references: [id])
+  group       group_product @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
   @@id([group_id, category_id])
   @@index([group_id])
   @@index([category_id])
 }
 
 model group_to_collection {
-  group_id       Int
-  collection_id  Int
-  
-  group          group_product  @relation(fields: [group_id], references: [id], onDelete: Cascade)
-  collection     collection     @relation(fields: [collection_id], references: [id])
-  
+  group_id      Int
+  collection_id Int
+  collection    collection    @relation(fields: [collection_id], references: [id])
+  group         group_product @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
   @@id([group_id, collection_id])
   @@index([group_id])
   @@index([collection_id])
 }
 
 model flash_sale {
-  id                Int           @id @default(autoincrement())
-  create_date       DateTime      @default(now())
-  start_date        DateTime    
-  end_date          DateTime    
-  sku               String        @unique 
-  quantity          Int     
-  flash_sale_price  Int
-  flash_sale_per    Int
-  price_origin      Int
-  status            String        @default("active") // สถานะ: active, expired, sold_out  
-  update_date       DateTime      @updatedAt
-  product           product       @relation(fields: [sku], references: [sku], onDelete: Cascade)
-  
-  @@index([sku])   
+  id               Int      @id @default(autoincrement())
+  create_date      DateTime @default(now())
+  start_date       DateTime
+  end_date         DateTime
+  sku              String   @unique
+  quantity         Int
+  flash_sale_price Int
+  flash_sale_per   Int
+  price_origin     Int
+  status           String   @default("active")
+  update_date      DateTime @updatedAt
+  product          product  @relation(fields: [sku], references: [sku], onDelete: Cascade)
+
+  @@index([sku])
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//<<----------------------promotion---------------------->>//
-//                                              _     _               
-//   _ __    _ __    ___    _ __ ___     ___   | |_  (_)   ___    _ __  
-//  | '_ \  | '__|  / _ \  | '_ ` _ \   / _ \  | __| | |  / _ \  | '_ \ 
-//  | |_) | | |    | (_) | | | | | | | | (_) | | |_  | | | (_) | | | | |
-//  | .__/  |_|     \___/  |_| |_| |_|  \___/   \__| |_|  \___/  |_| |_|
-//  | |                                                               
-//  |_|                                                               
-//<<----------------------promotion---------------------->>//
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//<<----------------------gernaral---------------------->>//
-//                                                       _ 
-//   __ _    ___   _ __   _ __     __ _   _ __    __ _  | |
-//  / _` |  / _ \ | '__| | '_ \   / _` | | '__|  / _` | | |
-// | (_| | |  __/ | |    | | | | | (_| | | |    | (_| | | |
-//  \__, |  \___| |_|    |_| |_|  \__,_| |_|     \__,_| |_|
-//   __/ |                                                  
-//  |___/                                                   
-//<<----------------------gernaral---------------------->>//
-
-
-
-
-
-
-
-
-
-//<<----------------------user---------------------->>//    
-//                | |  | |
-//                | |  | |  ___   ___  _ __ 
-//                | |  | | / __| / _ \| '__|
-//                | |__| | \__ \|  __/| |
-//                 \____/  |___/ \___||_|
-//<<----------------------user---------------------->>//
-
-
-
-
-
-
-
-
-
-
-//<<----------------------admin---------------------->>//
-//                 _               _         
-//      /\        | |             (_)        
-//     /  \     __| |  _ __ ___    _   _____
-//    / /\ \   / _` | | '_ ` _ \  | | |  __ |
-//   / ____ \ | (_| | | | | | | | | | | | | |  
-//  /_/    \_\ \__,_| |_| |_| |_| |_| |_| |_|
-//<<----------------------admin---------------------->>//
 model accountAdmin {
   id        String    @id @default(cuid())
   name      String?
@@ -224,6 +119,41 @@ model accountAdmin {
   role      AdminRole @default(admin)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model img_group_product {
+  id            Int           @id @default(autoincrement())
+  group_id      Int           @unique
+  create_date   DateTime      @default(now())
+  update_date   DateTime
+  img_url_group String[]      @default([])
+  group_product group_product @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@index([group_id])
+}
+
+model img_product {
+  id              Int      @id @default(autoincrement())
+  product_id      Int      @unique
+  create_date     DateTime @default(now())
+  update_date     DateTime
+  img_url_product String?
+  product         product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id])
+}
+
+model product_description {
+  id            Int           @id @default(autoincrement())
+  uuid          String
+  group_id      Int           @unique
+  text_des      String[]      @default([])
+  img_url_des   String[]      @default([])
+  create_date   DateTime      @default(now())
+  update_date   DateTime
+  group_product group_product @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@index([group_id])
 }
 
 enum AdminRole {
