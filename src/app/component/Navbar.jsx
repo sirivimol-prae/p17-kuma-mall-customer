@@ -13,17 +13,17 @@ const Navbar = () => {
         <nav className="hidden lg:block" style={{marginTop:"10px", marginBottom:"40px"}}>
             <div style={{marginLeft: "75px", marginRight: "75px"}}>
                 <div className='flex w-full justify-end gap-2' style={{marginBottom:"10px",gap:"20px"}}>
-                    <div>English</div>
-                    <div>ติดต่อ KUMAま</div>
+                    <div className='text-[#5F6368]'>English</div>
+                    <div className='text-[#5F6368]'>ติดต่อ KUMAま</div>
                     <div className='flex items-center gap-1'>
-                        <User className="w-4 h-4" />
-                        <span>ผู้ใช้ XXXXXX</span>
+                        <User className="w-4 h-4 text-[#5F6368]" />
+                        <span className='text-[#5F6368]'>ผู้ใช้ XXXXXX</span>
                     </div>
                     <div className='bg-[#D6A985] px-10 py-[1px] rounded-[7px] text-white'>KUMAま FRIEND</div>
-                    <div>|</div>
+                    <div className='text-[#5F6368]'>|</div>
                     <div className='flex items-center gap-1'>
                         <img src="/images/kumacoin.png" alt='kumacoin' className='w-6 h-auto'/>
-                        <span>50 Coin</span>
+                        <span className='text-[#5F6368]'>50 Coin</span>
                     </div>
                 </div>
 
@@ -33,19 +33,21 @@ const Navbar = () => {
                             <img src="/images/logo.png" alt="logo" />
                         </Link>
 
-                        <div>สินค้าทั้งหมด</div>
+                        <Link href="/product" className='flex items-center gap-1 cursor-pointer'>
+                            <span className='text-[#5F6368]'>สินค้าทั้งหมด</span>
+                        </Link>
 
                         <div className='flex items-center gap-1'>
-                            <span>สินค้า</span>
-                            <ChevronDown className="w-4 h-4" />
+                            <span className='text-[#5F6368]'>สินค้า</span>
+                            <ChevronDown className="w-4 h-4 text-[#5F6368]" />
                         </div>
                         <Link href="/flashsale" className='flex items-center gap-1 cursor-pointer'>
-                            <span>โปรโมชั่น</span>
-                            <ChevronDown className="w-4 h-4" />
+                            <span className='text-[#5F6368]'>โปรโมชั่น</span>
+                            <ChevronDown className="w-4 h-4 text-[#5F6368]" />
                         </Link>
                         <Link href="/article" className='flex items-center gap-1 cursor-pointer'>
-                            <span>บทความ</span>
-                            <ChevronDown className="w-4 h-4" />
+                            <span className='text-[#5F6368]'>บทความ</span>
+                            <ChevronDown className="w-4 h-4 text-[#5F6368]" />
                         </Link>
                     </div>
 
@@ -61,8 +63,8 @@ const Navbar = () => {
                                 <Search style={{width:"21px", height:"auto", color:'white'}}/>
                             </div>
                         </div>
-                        <History className="w-6 h-6" />
-                        <ShoppingCart className="w-6 h-6" />
+                        <History className="w-6 h-6 text-[#5F6368]" />
+                        <ShoppingCart className="w-6 h-6 text-[#5F6368]" />
                     </div>
                 </div>
             </div>

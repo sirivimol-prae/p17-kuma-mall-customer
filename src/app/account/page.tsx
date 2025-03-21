@@ -1,21 +1,31 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Calendar } from 'lucide-react'
 import AccountSidebar from './component/sidebar';
 
-//MockData
-export default function page() {
-  const [userInfo, setUserInfo] = useState({
-    name: 'XXXXX XXXXXXXX',
-    phone: '81-123-4567',
-    email: 'XXXXXXXX@gmail.com',
-    birthdate: '23/07/1998',
-    gender: 'ชาย'
-  });
+interface UserInfo {
+  name: string;
+  phone: string;
+  email: string;
+  birthdate: string;
+  gender: 'ชาย' | 'หญิง' | 'ไม่ระบุเพศ';
+}
 
-  const handleSubmit = (e) => {
+const mockUserData: UserInfo = {
+  name: 'XXXXX XXXXXXXX',
+  phone: '81-123-4567',
+  email: 'XXXXXXXX@gmail.com',
+  birthdate: '23/07/1998',
+  gender: 'ชาย'
+};
+
+export default function Page(): React.ReactElement {
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo>(mockUserData);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     console.log('บันทึกข้อมูล:', userInfo);
   };
@@ -89,14 +99,35 @@ export default function page() {
                 <div className="flex flex-col md:flex-row gap-5 mb-5">
                   <div className="flex-1">
                     <label htmlFor="birthdate" className="block mb-2 text-[16px] text-[#5F6368]">วัน/เดือน/ปี เกิด</label>
-                    <input 
-                      type="text" 
-                      id="birthdate" 
-                      value={userInfo.birthdate} 
-                      placeholder="DD/MM/YYYY"
-                      onChange={(e) => setUserInfo({...userInfo, birthdate: e.target.value})}
-                      className="w-full px-4 py-2 border border-[#AFB2B6] rounded text-[16px] text-[#5F6368]"
-                    />
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        id="birthdate"
+                        value={userInfo.birthdate}
+                        onClick={() => dateInputRef.current?.showPicker()}
+                        readOnly
+                        placeholder="DD/MM/YYYY"
+                        className="w-full px-4 py-2 border border-[#AFB2B6] rounded text-[16px] text-[#5F6368]"
+                      />
+                      <input
+                        type="date"
+                        ref={dateInputRef}
+                        className="opacity-0 absolute w-0 h-0"
+                        defaultValue={userInfo.birthdate.split('/').reverse().join('-')}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            const [year, month, day] = e.target.value.split('-');
+                            setUserInfo({...userInfo, birthdate: `${day}/${month}/${year}`});
+                          }
+                        }}
+                      />
+                      <div 
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        onClick={() => dateInputRef.current?.showPicker()}
+                      >
+                        <Calendar size={18} color="#5F6368" />
+                      </div>
+                    </div>
                   </div>
                   <div className="flex-1">
                     <label htmlFor="gender" className="block mb-2 text-[16px] text-[#5F6368]">เพศของฉัน</label>
@@ -108,7 +139,7 @@ export default function page() {
                             name="gender" 
                             value="ชาย" 
                             checked={userInfo.gender === 'ชาย'} 
-                            onChange={(e) => setUserInfo({...userInfo, gender: e.target.value})}
+                            onChange={(e) => setUserInfo({...userInfo, gender: e.target.value as 'ชาย' | 'หญิง' | 'ไม่ระบุเพศ'})}
                             className="sr-only"
                           />
                           <div className={`w-5 h-5 rounded-full border-2 ${userInfo.gender === 'ชาย' ? 'border-[#AFB2B6]' : 'border-gray-300'}`}>
@@ -126,7 +157,7 @@ export default function page() {
                             name="gender" 
                             value="หญิง" 
                             checked={userInfo.gender === 'หญิง'} 
-                            onChange={(e) => setUserInfo({...userInfo, gender: e.target.value})}
+                            onChange={(e) => setUserInfo({...userInfo, gender: e.target.value as 'ชาย' | 'หญิง' | 'ไม่ระบุเพศ'})}
                             className="sr-only"
                           />
                           <div className={`w-5 h-5 rounded-full border-2 ${userInfo.gender === 'หญิง' ? 'border-[#AFB2B6]' : 'border-gray-300'}`}>
@@ -144,7 +175,7 @@ export default function page() {
                             name="gender" 
                             value="ไม่ระบุเพศ" 
                             checked={userInfo.gender === 'ไม่ระบุเพศ'} 
-                            onChange={(e) => setUserInfo({...userInfo, gender: e.target.value})}
+                            onChange={(e) => setUserInfo({...userInfo, gender: e.target.value as 'ชาย' | 'หญิง' | 'ไม่ระบุเพศ'})}
                             className="sr-only"
                           />
                           <div className={`w-5 h-5 rounded-full border-2 ${userInfo.gender === 'ไม่ระบุเพศ' ? 'border-[#AFB2B6]' : 'border-gray-300'}`}>
