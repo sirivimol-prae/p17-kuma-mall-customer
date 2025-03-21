@@ -5,15 +5,14 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // ดึงข้อมูล FlashSale ที่ยังไม่หมดอายุและยังมีสินค้า
     const flashSaleProducts = await prisma.flash_sale.findMany({
       where: {
         status: 'active',
         quantity: {
-          gt: 0 // มีจำนวนสินค้ามากกว่า 0
+          gt: 0
         },
         end_date: {
-          gt: new Date() // วันที่สิ้นสุดยังไม่มาถึง
+          gt: new Date()
         }
       },
       include: {
@@ -36,13 +35,11 @@ export async function GET() {
         }
       },
       orderBy: {
-        end_date: 'asc', // เรียงตามเวลาที่ใกล้จะหมดอายุก่อน
+        end_date: 'asc',
       },
     });
 
-    // แปลงข้อมูลให้เหมาะกับการใช้งานทางฝั่ง Frontend
     const formattedProducts = flashSaleProducts.map(item => {
-      // รวบรวมหมวดหมู่ทั้งหมดของสินค้า
       const categories = item.product.product_group.flatMap(pg => 
         pg.group.group_categories.map(gc => ({
           id: gc.category.id,

@@ -1,14 +1,17 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import axios from 'axios';
 
-interface Category {
-  id: string;
-  label: string;
+interface Collection {
+  id: number;
+  name: string;
+  uuid: string;
 }
 
 interface FilterValues {
-  categories: string[];
+  collections: number[];
   priceRange: [number, number];
 }
 
@@ -17,20 +20,25 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
-  const [priceRange, setPriceRange] = useState<[number, number]>([160, 780]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const collectionParam = searchParams.get('collection');
+  const minPriceParam = searchParams.get('minPrice');
+  const maxPriceParam = searchParams.get('maxPrice');
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    minPriceParam ? parseInt(minPriceParam) : 0,
+    maxPriceParam ? parseInt(maxPriceParam) : 9999
+  ]);
+  const [selectedCollections, setSelectedCollections] = useState<number[]>(
+    collectionParam ? collectionParam.split(',').map(id => parseInt(id)) : []
+  );
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [activeHandle, setActiveHandle] = useState<'min' | 'max' | null>(null);
-  
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
   const sliderRef = useRef<HTMLDivElement>(null);
-  
-  const categories: Category[] = [
-    { id: 'dog', label: 'คอกสุนัข' },
-    { id: 'cat', label: 'แปลแมว' },
-    { id: 'pet', label: 'ที่นอน' },
-  ];
-
-  const serviceCategories: Category[] = [
+  const serviceCategories = [
     { id: 'new', label: 'สินค้าเข้าใหม่' },
     { id: 'sale', label: 'Flash Sale!' },
     { id: 'discount', label: 'สินค้าลดราคา' },
@@ -38,28 +46,53 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     { id: 'set', label: 'เซ็ตสินค้า' },
   ];
 
-  const minPrice = 160;
-  const maxPrice = 780; 
-
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategories(prev => {
-      if (prev.includes(categoryId)) {
-        return prev.filter(id => id !== categoryId);
-      } else {
-        return [...prev, categoryId];
+  const minPrice = 0;
+  const maxPrice = 9999; 
+  
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        setLoading(true);
+        setError(false);
+        const response = await axios.get('/api/collections');
+        if (response.data.success && response.data.data.length > 0) {
+          setCollections(response.data.data);
+        } else {
+          setError(true);
+          setCollections([]);
+        }
+      } catch (error) {
+        console.error('Error fetching collections:', error);
+        setError(true);
+        setCollections([]);
+      } finally {
+        setLoading(false);
       }
+    };
+
+    fetchCollections();
+  }, []);
+
+  const handleCollectionChange = (collectionId: number) => {
+    setSelectedCollections(prev => {
+      let newCollections;
+      if (prev.includes(collectionId)) {
+        newCollections = prev.filter(id => id !== collectionId);
+      } else {
+        newCollections = [...prev, collectionId];
+      }
+
+      updateUrlWithFilters(newCollections, priceRange);
+
+      if (onFilterChange) {
+        onFilterChange({
+          collections: newCollections,
+          priceRange: priceRange
+        });
+      }
+      
+      return newCollections;
     });
-    
-    if (onFilterChange) {
-      const newCategories = selectedCategories.includes(categoryId) 
-        ? selectedCategories.filter(id => id !== categoryId)
-        : [...selectedCategories, categoryId];
-        
-      onFilterChange({
-        categories: newCategories,
-        priceRange: priceRange
-      });
-    }
   };
 
   const handleStartDrag = (e: React.MouseEvent, handle: 'min' | 'max') => {
@@ -81,29 +114,24 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     if (activeHandle === 'min') {
       const newMinPrice = Math.min(price, priceRange[1] - 10); 
       setPriceRange([newMinPrice, priceRange[1]]);
-      
-      if (onFilterChange) {
-        onFilterChange({
-          categories: selectedCategories,
-          priceRange: [newMinPrice, priceRange[1]]
-        });
-      }
     } else {
       const newMaxPrice = Math.max(price, priceRange[0] + 10); 
       setPriceRange([priceRange[0], newMaxPrice]);
-      
-      if (onFilterChange) {
-        onFilterChange({
-          categories: selectedCategories,
-          priceRange: [priceRange[0], newMaxPrice]
-        });
-      }
     }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
     setActiveHandle(null);
+
+    updateUrlWithFilters(selectedCollections, priceRange);
+
+    if (onFilterChange) {
+      onFilterChange({
+        collections: selectedCollections,
+        priceRange: priceRange
+      });
+    }
   };
 
   useEffect(() => {
@@ -116,16 +144,49 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, priceRange]);
+  }, [isDragging, priceRange, selectedCollections]);
+
+  const updateUrlWithFilters = (collections: number[], prices: [number, number]) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set('page', '1');
+
+    if (collections.length > 0) {
+      params.set('collection', collections.join(','));
+    } else {
+      params.delete('collection');
+    }
+
+    params.set('minPrice', prices[0].toString());
+    params.set('maxPrice', prices[1].toString());
+
+    const sortBy = searchParams.get('sort');
+    if (sortBy) {
+      params.set('sort', sortBy);
+    }
+
+    router.push(`/product?${params.toString()}`);
+  };
 
   const handleReset = () => {
-    setSelectedCategories([]);
-    setPriceRange([160, 780]);
-    
+
+    setSelectedCollections([]);
+    setPriceRange([minPrice, maxPrice]);
+
+    const params = new URLSearchParams();
+    params.set('page', '1');
+
+    const sortBy = searchParams.get('sort');
+    if (sortBy) {
+      params.set('sort', sortBy);
+    }
+
+    router.push(`/product?${params.toString()}`);
+
     if (onFilterChange) {
       onFilterChange({
-        categories: [],
-        priceRange: [160, 780]
+        collections: [],
+        priceRange: [minPrice, maxPrice]
       });
     }
   };
@@ -138,22 +199,35 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     <div className="w-full max-w-[180px]">
       <div className="mb-6">
         <h3 className="text-[20px] font-medium text-[#5F6368] mb-3">สินค้าทั้งหมด</h3>
-        <div className="space-y-2">
-          {categories.map((category) => (
-            <div key={category.id} className="flex items-center">
-              <input
-                type="checkbox"
-                id={category.id}
-                checked={selectedCategories.includes(category.id)}
-                onChange={() => handleCategoryChange(category.id)}
-                className="h-4 w-4 text-[#D6A985] rounded border-gray-300 focus:ring-[#D6A985]"
-              />
-              <label htmlFor={category.id} className="ml-2 text-[16px] text-[#5F6368]">
-                {category.label}
-              </label>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((_, index) => (
+              <div key={index} className="flex items-center">
+                <div className="h-4 w-4 bg-gray-200 rounded"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded ml-2"></div>
+              </div>
+            ))}
+          </div>
+        ) : error || collections.length === 0 ? (
+          <div className="text-[#5F6368] text-[16px]">ไม่มีหมวดหมู่</div>
+        ) : (
+          <div className="space-y-2">
+            {collections.map((collection) => (
+              <div key={collection.id} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`collection-${collection.id}`}
+                  checked={selectedCollections.includes(collection.id)}
+                  onChange={() => handleCollectionChange(collection.id)}
+                  className="h-4 w-4 text-[#D6A985] rounded border-gray-300 focus:ring-[#D6A985]"
+                />
+                <label htmlFor={`collection-${collection.id}`} className="ml-2 text-[16px] text-[#5F6368]">
+                  {collection.name}
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mb-6">
@@ -203,8 +277,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
               <input
                 type="checkbox"
                 id={category.id}
-                checked={selectedCategories.includes(category.id)}
-                onChange={() => handleCategoryChange(category.id)}
+                checked={false} 
+                onChange={() => {}}
                 className="h-4 w-4 text-[#D6A985] rounded border-gray-300 focus:ring-[#D6A985]"
               />
               <label htmlFor={category.id} className="ml-2 text-[16px] text-[#5F6368]">

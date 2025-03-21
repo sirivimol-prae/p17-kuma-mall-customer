@@ -1,4 +1,3 @@
-// กำหนด Type สำหรับข้อมูลสินค้า
 interface OrderItem {
     id: number;
     name: string;
@@ -10,31 +9,24 @@ interface OrderItem {
     originalPrice: number;
     price: number;
   }
-  
-  // กำหนด Type สำหรับข้อมูลคำสั่งซื้อ
   interface Order {
     id: string;
     items: OrderItem[];
     totalPrice: number;
     status: string;
   }
-  
-  // กำหนด Type สำหรับขั้นตอนการติดตาม
   interface TrackingStep {
     title: string;
     subtitle?: string;
     detail?: string;
     status: 'completed' | 'active' | 'pending';
   }
-  
-  // กำหนด Type สำหรับไทม์ไลน์การขนส่ง
   interface TrackingEvent {
     date: string;
     message: string;
     detail?: string;
   }
-  
-  // กำหนด Type สำหรับข้อมูลการติดตามการจัดส่ง
+
   interface TrackingInfo {
     id: string;
     trackingNumber: string;
@@ -47,8 +39,7 @@ interface OrderItem {
     steps: TrackingStep[];
     timeline: TrackingEvent[];
   }
-  
-  // Mock data สำหรับคำสั่งซื้อ
+
   export const mockOrders: Order[] = [
     {
       id: 'XXXX-0131082024',
@@ -87,8 +78,7 @@ interface OrderItem {
       status: 'รอจัดส่ง'
     }
   ];
-  
-  // Mock data สำหรับข้อมูลการติดตามการจัดส่ง
+
   export const trackingInfo: TrackingInfo = {
     id: 'XXXX-0131082024',
     trackingNumber: '11G31234567890',

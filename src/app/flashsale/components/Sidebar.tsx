@@ -9,7 +9,6 @@ export interface FilterOptions {
   priceRange: [number, number];
 }
 
-// สร้าง Context สำหรับการแชร์ข้อมูลการกรองระหว่าง Sidebar และ ProductGrid
 export const FilterContext = createContext<{
   filters: FilterOptions;
   setFilters: (filters: FilterOptions) => void;
@@ -30,7 +29,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // ดึงข้อมูลหมวดหมู่จาก API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -41,7 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
           setCategories(response.data);
         } else {
           console.error('Failed to fetch categories:', response.error);
-          // ถ้าดึงข้อมูลไม่สำเร็จ ใช้ข้อมูลตัวอย่างเพื่อให้ UI ยังทำงานได้
           setCategories([
             { id: 1, uuid: '', name: 'บ้านและที่นอน', create_Date: '' },
             { id: 2, uuid: '', name: 'อาหารสัตว์เลี้ยง', create_Date: '' },
@@ -57,7 +54,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
-        // ถ้าเกิดข้อผิดพลาด ใช้ข้อมูลตัวอย่างเช่นกัน
         setCategories([
           { id: 1, uuid: '', name: 'บ้านและที่นอน', create_Date: '' },
           { id: 2, uuid: '', name: 'อาหารสัตว์เลี้ยง', create_Date: '' },
@@ -83,8 +79,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
       const newCategories = prev.includes(categoryId) 
         ? prev.filter(id => id !== categoryId)
         : [...prev, categoryId];
-      
-      // อัปเดต FilterContext
       setFilters({
         ...filters,
         categories: newCategories
@@ -100,8 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
       : [value, priceRange[1]];
       
     setPriceRange(newRange);
-    
-    // อัปเดต FilterContext
+
     setFilters({
       ...filters,
       priceRange: newRange
@@ -111,8 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const handleReset = () => {
     setSelectedCategories([]);
     setPriceRange([824, 8350]);
-    
-    // อัปเดต FilterContext
+
     setFilters({
       categories: [],
       priceRange: [824, 8350]

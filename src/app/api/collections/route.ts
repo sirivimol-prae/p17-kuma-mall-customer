@@ -5,21 +5,20 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const categories = await prisma.category.findMany({
-      take: 10,
+    const collections = await prisma.collection.findMany({
       orderBy: {
-        create_Date: 'desc',
+        name: 'asc',
       },
     });
 
     return NextResponse.json({ 
       success: true, 
-      data: categories 
+      data: collections 
     });
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    console.error('Error fetching collections:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch categories' },
+      { success: false, error: 'Failed to fetch collections' },
       { status: 500 }
     );
   } finally {

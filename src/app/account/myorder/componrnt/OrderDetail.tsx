@@ -53,7 +53,6 @@ interface OrderDetailProps {
 }
 
 const OrderDetail: React.FC<OrderDetailProps> = ({ trackingInfo, order, onBackToOrders }) => {
-  // คำนวณข้อมูลราคา
   const priceInfo = useMemo(() => {
     if (!order) return { itemsTotal: 0, shippingFee: 120, grandTotal: 0 };
     

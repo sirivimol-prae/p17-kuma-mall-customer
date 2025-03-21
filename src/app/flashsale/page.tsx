@@ -8,16 +8,13 @@ import { Metadata } from 'next'
 import ProductGrid from './components/ProductGrid'
 import FilterProvider from './components/FilterProvider'
 
-// กำหนด metadata สำหรับ SEO
 export const metadata: Metadata = {
   title: 'FLASHSALE! | ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
   description: 'โปรโมชันลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง ของใช้ อาหาร ของเล่น และอุปกรณ์สำหรับสัตว์เลี้ยงคุณภาพดี ลดสูงสุด 50% จำนวนจำกัด',
   keywords: 'flashsale, โปรโมชัน, ลดราคา, สินค้าสัตว์เลี้ยง, อาหารสัตว์, ของใช้สัตว์เลี้ยง',
 };
 
-// เรียกใช้ฟังก์ชัน async เพื่อดึงข้อมูลจาก Prisma
 async function FlashsaleComponent() {
-  // ดึงข้อมูลสินค้า FlashSale จาก Prisma โดยตรง (Server-side)
   const prisma = new PrismaClient();
   let flashSaleProducts: FlashSaleProduct[] = [];
   let isError = false;
@@ -25,16 +22,15 @@ async function FlashsaleComponent() {
   
   try {
     console.log("กำลังดึงข้อมูล FlashSale...");
-    
-    // ดึงข้อมูล FlashSale ที่ยังไม่หมดอายุและยังมีสินค้า
+
     const items = await prisma.flash_sale.findMany({
       where: {
         status: 'active',
         quantity: {
-          gt: 0 // มีจำนวนสินค้ามากกว่า 0
+          gt: 0
         },
         end_date: {
-          gt: new Date() // วันที่สิ้นสุดยังไม่มาถึง
+          gt: new Date()
         }
       },
       include: {
@@ -57,17 +53,15 @@ async function FlashsaleComponent() {
         }
       },
       orderBy: {
-        end_date: 'asc', // เรียงตามเวลาที่ใกล้จะหมดอายุก่อน
+        end_date: 'asc',
       },
     });
 
     console.log("จำนวนสินค้า FlashSale ที่พบ:", items.length);
     console.log("ข้อมูลสินค้า:", JSON.stringify(items.slice(0, 1)));
-    // ถ้าไม่พบสินค้า FlashSale เลย ให้ใช้ข้อมูลตัวอย่างเพื่อการทดสอบ
     if (items.length === 0) {
       console.log("ไม่พบสินค้า FlashSale ในฐานข้อมูล");
       
-      // ใช้ข้อมูลตัวอย่างเพื่อทดสอบแสดงผล
       flashSaleProducts = [
         {
           id: 1,
@@ -119,10 +113,8 @@ async function FlashsaleComponent() {
         }
       ];
     } else {
-      // แปลงข้อมูลให้เหมาะกับการใช้งานทางฝั่ง Frontend
       flashSaleProducts = items.map(item => {
         try {
-          // รวบรวมหมวดหมู่ทั้งหมดของสินค้า
           const categories = item.product.product_group.flatMap(pg => {
             try {
               return pg.group.group_categories.map(gc => ({
@@ -151,7 +143,7 @@ async function FlashsaleComponent() {
           console.error("Error mapping product:", error);
           return null;
         }
-      }).filter(Boolean) as FlashSaleProduct[]; // กรองออกถ้าเป็น null
+      }).filter(Boolean) as FlashSaleProduct[];
     }
     
     console.log("จำนวนสินค้าที่แสดงผล:", flashSaleProducts.length);
@@ -165,7 +157,6 @@ async function FlashsaleComponent() {
 
   return (
     <div>
-      {/* Breadcrumb */}
       <div className="container mx-auto py-3">
         <div className="flex items-center text-gray-600">
           <Link href="/" className="flex items-center gap-2 hover:text-[#B86A4B]">
@@ -185,11 +176,9 @@ async function FlashsaleComponent() {
         />
       </div>
 
-      {/* Flashsale Header with Timer */}
       <div className="w-full border-t border-b border-gray-200 py-2">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center">
-            {/* Flashsale Icon and Text */}
             <div className="flex items-center">
               <div className="bg-[#B86A4B] rounded-full p-1 mr-2">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -199,8 +188,7 @@ async function FlashsaleComponent() {
               <span className="font-medium text-[#B86A4B] mr-2">FLASHSALES</span>
               <span className="text-[#D6A985] text-sm">(Website Only)</span>
             </div>
-            
-            {/* Timer Display */}
+
             <div className="flex items-center ml-4">
               <div className="bg-[#B86A4B] text-white px-2 rounded mx-1">
                 01
@@ -215,8 +203,7 @@ async function FlashsaleComponent() {
               </div>
             </div>
           </div>
-          
-          {/* Sort Option */}
+
           <div className="flex items-center text-[#D6A985]">
             <span className="mr-1">เรียงลำดับ</span>
             <ChevronDown size={16} />
@@ -234,12 +221,10 @@ async function FlashsaleComponent() {
         <FilterProvider>
           <div className="container mx-auto py-6">
             <div className="flex gap-6">
-              {/* Sidebar */}
               <div className="w-1/5">
                 <Sidebar />
               </div>
 
-              {/* Products Grid */}
               <div className="w-4/5">
                 {flashSaleProducts.length === 0 ? (
                   <div className="text-center py-8">
@@ -249,8 +234,7 @@ async function FlashsaleComponent() {
                 ) : (
                   <ProductGrid products={flashSaleProducts} key={Date.now()} />
                 )}
-                
-                {/* Debug information - ลบออกเมื่อแก้ไขปัญหาเสร็จ */}
+
                 <div className="mt-8 p-4 border border-gray-200 rounded bg-gray-50 text-xs text-gray-500">
                   <p>จำนวนสินค้าที่พบ: {flashSaleProducts.length}</p>
                   <p>สถานะ: {isError ? 'มีข้อผิดพลาด' : 'สำเร็จ'}</p>
