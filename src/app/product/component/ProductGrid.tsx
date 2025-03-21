@@ -26,7 +26,7 @@ const ProductGrid: React.FC = () => {
       price: 300,
       originalPrice: 379,
       rating: 4.8,
-      image: './images/roll.png'
+      image: './images/bed2.png'
     },
     {
       id: 3,
@@ -34,7 +34,7 @@ const ProductGrid: React.FC = () => {
       price: 150,
       originalPrice: 199,
       rating: 4.8,
-      image: './images/bed2.png'
+      image: './images/roll.png'
     },
     {
       id: 4,
