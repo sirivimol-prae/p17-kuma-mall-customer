@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { ArrowLeft, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import axios from 'axios'
 import Image from 'next/image'
 import Sidebar from './component/sidebar'
 import ProductGrid from './component/ProductGrid'
@@ -46,16 +45,23 @@ export default function Page() {
     { value: 'priceAsc', label: 'ราคาต่ำ - สูง' },
     { value: 'priceDesc', label: 'ราคาสูง - ต่ำ' }
   ];
+  
   const fetchProducts = async (page: number, sort: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/products?page=${page}&pageSize=${pageSize}&sortBy=${sort}`);
+      const response = await fetch(`/api/products?page=${page}&pageSize=${pageSize}&sort=${sort}`);
       
-      if (response.data.success) {
-        setProducts(response.data.data);
-        setPagination(response.data.pagination);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setProducts(data.data);
+        setPagination(data.pagination);
       } else {
-        setError(response.data.error || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+        setError(data.error || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
       }
     } catch (err) {
       console.error('Error fetching products:', err);

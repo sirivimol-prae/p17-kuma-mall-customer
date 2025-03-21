@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import axios from 'axios';
 
 interface Collection {
   id: number;
@@ -38,6 +37,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const serviceCategories = [
     { id: 'new', label: 'สินค้าเข้าใหม่' },
     { id: 'sale', label: 'Flash Sale!' },
@@ -54,9 +55,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
       try {
         setLoading(true);
         setError(false);
-        const response = await axios.get('/api/collections');
-        if (response.data.success && response.data.data.length > 0) {
-          setCollections(response.data.data);
+        const response = await fetch('/api/collections');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+          setCollections(data.data);
         } else {
           setError(true);
           setCollections([]);
@@ -124,14 +132,20 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     setIsDragging(false);
     setActiveHandle(null);
 
-    updateUrlWithFilters(selectedCollections, priceRange);
-
-    if (onFilterChange) {
-      onFilterChange({
-        collections: selectedCollections,
-        priceRange: priceRange
-      });
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+    
+    timeoutRef.current = setTimeout(() => {
+      updateUrlWithFilters(selectedCollections, priceRange);
+
+      if (onFilterChange) {
+        onFilterChange({
+          collections: selectedCollections,
+          priceRange: priceRange
+        });
+      }
+    }, 500);
   };
 
   useEffect(() => {
@@ -143,6 +157,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, [isDragging, priceRange, selectedCollections]);
 
@@ -169,7 +187,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   };
 
   const handleReset = () => {
-
     setSelectedCollections([]);
     setPriceRange([minPrice, maxPrice]);
 

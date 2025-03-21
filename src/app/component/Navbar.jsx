@@ -109,18 +109,20 @@ const Navbar = () => {
 
             {/* Tablet Menu */}
             <div className="mt-4 flex justify-center items-center gap-8">
-                <div>สินค้าทั้งหมด</div>
+                <Link href="/product" className="flex items-center gap-1">
+                    <span>สินค้าทั้งหมด</span>
+                </Link>
                 <div className="flex items-center gap-1">
-                <span>สินค้า</span>
-                <ChevronDown className="w-4 h-4" />
+                    <span>สินค้า</span>
+                    <ChevronDown className="w-4 h-4" />
                 </div>
                 <Link href="/flashsale" className="flex items-center gap-1">
-                <span>โปรโมชั่น</span>
-                <ChevronDown className="w-4 h-4" />
+                    <span>โปรโมชั่น</span>
+                    <ChevronDown className="w-4 h-4" />
                 </Link>
                 <Link href="/article" className="flex items-center gap-1" />
-                <span>บทความ</span>
-                <ChevronDown className="w-4 h-4" />
+                    <span>บทความ</span>
+                    <ChevronDown className="w-4 h-4" />
                 <div>ติดต่อ KUMAま</div>
             </div>
             </div>
@@ -140,7 +142,7 @@ const Navbar = () => {
                 </button>
                 
                 <Link href="/" className="w-8">
-                <img src="/images/logo.png" alt="logo" className="w-full h-auto" />
+                    <img src="/images/logo.png" alt="logo" className="w-full h-auto" />
                 </Link>
 
                 <div className="flex items-center gap-4">

@@ -1,4 +1,3 @@
-// src/app/api/products/route.ts
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
@@ -92,13 +91,9 @@ export async function GET(request: Request) {
 
     const formattedGroups = groupProducts.map(group => {
       const productsInPriceRange = group.products.map(p => p.product);
-      
       const prices = productsInPriceRange.map(p => p!.price_origin);
       const minGroupPrice = prices.length > 0 ? Math.min(...prices) : 0;
-      
       const hasDiscount = productsInPriceRange.some(p => p!.make_price !== null && p!.make_price < p!.price_origin);
-      
-      // ดึงรูปภาพจากความสัมพันธ์ img_group_product ถ้ามี
       const imageUrl = group.img_group_product?.img_url_group?.[0] || null;
       
       return {

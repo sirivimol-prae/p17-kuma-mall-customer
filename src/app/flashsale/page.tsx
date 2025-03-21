@@ -1,251 +1,230 @@
-import React from 'react'
-import { ChevronDown, ArrowLeft } from 'lucide-react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { ArrowLeft, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import Sidebar from './components/Sidebar'
-import { FlashSaleProduct } from '@/types/product'
-import { PrismaClient } from '@prisma/client'
-import { Metadata } from 'next'
 import ProductGrid from './components/ProductGrid'
-import FilterProvider from './components/FilterProvider'
+import { FlashSaleProduct, PaginationInfo } from '@/types/product'
+import Head from 'next/head'
 
-export const metadata: Metadata = {
-  title: 'FLASHSALE! | ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
-  description: 'โปรโมชันลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง ของใช้ อาหาร ของเล่น และอุปกรณ์สำหรับสัตว์เลี้ยงคุณภาพดี ลดสูงสุด 50% จำนวนจำกัด',
-  keywords: 'flashsale, โปรโมชัน, ลดราคา, สินค้าสัตว์เลี้ยง, อาหารสัตว์, ของใช้สัตว์เลี้ยง',
-};
-
-async function FlashsaleComponent() {
-  const prisma = new PrismaClient();
-  let flashSaleProducts: FlashSaleProduct[] = [];
-  let isError = false;
-  let errorMessage = '';
-  
-  try {
-    console.log("กำลังดึงข้อมูล FlashSale...");
-
-    const items = await prisma.flash_sale.findMany({
-      where: {
-        status: 'active',
-        quantity: {
-          gt: 0
-        },
-        end_date: {
-          gt: new Date()
-        }
-      },
-      include: {
-        product: {
-          include: {
-            product_group: {
-              include: {
-                group: {
-                  include: {
-                    group_categories: {
-                      include: {
-                        category: true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      orderBy: {
-        end_date: 'asc',
-      },
-    });
-
-    console.log("จำนวนสินค้า FlashSale ที่พบ:", items.length);
-    console.log("ข้อมูลสินค้า:", JSON.stringify(items.slice(0, 1)));
-    if (items.length === 0) {
-      console.log("ไม่พบสินค้า FlashSale ในฐานข้อมูล");
-      
-      flashSaleProducts = [
-        {
-          id: 1,
-          sku: 'FS001',
-          title: 'KUMAま หมอนหนุนน้องหมา',
-          price: 880,
-          originalPrice: 899,
-          discount: 20,
-          quantity: 10,
-          image: './images/Pillow.png',
-          endDate: new Date(Date.now() + 86400000).toISOString(),
-          categories: [{ id: 1, name: 'บ้านและที่นอน' }]
-        },
-        {
-          id: 2,
-          sku: 'FS002',
-          title: 'KUMAま ที่ฝนเล็บน้องแมวรูปโคม',
-          price: 880,
-          originalPrice: 899,
-          discount: 5,
-          quantity: 15,
-          image: './images/bowl.png',
-          endDate: new Date(Date.now() + 172800000).toISOString(),
-          categories: [{ id: 5, name: 'ของเล่นสัตว์เลี้ยง' }]
-        },
-        {
-          id: 3,
-          sku: 'FS003',
-          title: 'KUMAま อาหารน้องหมาน้องแมว',
-          price: 880,
-          originalPrice: 899,
-          discount: 5,
-          quantity: 20,
-          image: './images/Kaniva.png',
-          endDate: new Date(Date.now() + 259200000).toISOString(),
-          categories: [{ id: 2, name: 'อาหารสัตว์เลี้ยง' }]
-        },
-        {
-          id: 4,
-          sku: 'FS004',
-          title: 'KUMAま ทรายแมวแถวบ้าน',
-          price: 880,
-          originalPrice: 899,
-          discount: 5,
-          quantity: 8,
-          image: './images/kasty.png',
-          endDate: new Date(Date.now() + 345600000).toISOString(),
-          categories: [{ id: 7, name: 'กระบะสัตว์เลี้ยง' }]
-        }
-      ];
-    } else {
-      flashSaleProducts = items.map(item => {
-        try {
-          const categories = item.product.product_group.flatMap(pg => {
-            try {
-              return pg.group.group_categories.map(gc => ({
-                id: gc.category.id,
-                name: gc.category.name
-              }));
-            } catch (error) {
-              console.error("Error mapping categories:", error);
-              return [];
-            }
-          });
-          
-          return {
-            id: item.id,
-            sku: item.sku,
-            title: item.product.name_sku || `สินค้า Flash Sale ${item.id}`,
-            price: item.flash_sale_price,
-            originalPrice: item.price_origin,
-            discount: item.flash_sale_per,
-            quantity: item.quantity,
-            image: item.product.img_url || `/images/product-${item.id % 4 + 1}.png`,
-            endDate: item.end_date.toISOString(),
-            categories: categories
-          };
-        } catch (error) {
-          console.error("Error mapping product:", error);
-          return null;
-        }
-      }).filter(Boolean) as FlashSaleProduct[];
-    }
-    
-    console.log("จำนวนสินค้าที่แสดงผล:", flashSaleProducts.length);
-  } catch (error) {
-    console.error('Error fetching flash sale products:', error);
-    isError = true;
-    errorMessage = `เกิดข้อผิดพลาดในการดึงข้อมูล: ${error instanceof Error ? error.message : 'Unknown error'}`;
-  } finally {
-    await prisma.$disconnect();
-  }
-
+const FlashSaleSeo = () => {
   return (
-    <div>
-      <div className="container mx-auto py-3">
-        <div className="flex items-center text-gray-600">
-          <Link href="/" className="flex items-center gap-2 hover:text-[#B86A4B]">
-            <ArrowLeft color="#5F6368" />
-            <span>หน้าแรก</span>
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-[#B86A4B]">FLASHSALES!</span>
-        </div>
-      </div>
-
-      <div className="mb-4">
-        <img 
-          src="./images/Promotion.png" 
-          alt="Background" 
-          className="w-[1255px] h-[220px] mx-auto"
-        />
-      </div>
-
-      <div className="w-full border-t border-b border-gray-200 py-2">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="flex items-center">
-              <div className="bg-[#B86A4B] rounded-full p-1 mr-2">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M13 10V3L4 14H11V21L20 10H13Z" fill="white" />
-                </svg>
-              </div>
-              <span className="font-medium text-[#B86A4B] mr-2">FLASHSALES</span>
-              <span className="text-[#D6A985] text-sm">(Website Only)</span>
-            </div>
-
-            <div className="flex items-center ml-4">
-              <div className="bg-[#B86A4B] text-white px-2 rounded mx-1">
-                01
-              </div>
-              <span className="text-[#B86A4B]">:</span>
-              <div className="bg-[#B86A4B] text-white px-2 rounded mx-1">
-                59
-              </div>
-              <span className="text-[#B86A4B]">:</span>
-              <div className="bg-[#B86A4B] text-white px-2 rounded mx-1">
-                59
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center text-[#D6A985]">
-            <span className="mr-1">เรียงลำดับ</span>
-            <ChevronDown size={16} />
-          </div>
-        </div>
-      </div>
-
-      {isError ? (
-        <div className="container mx-auto py-12 text-center">
-          <p className="text-lg text-red-600 mb-2">ขออภัย ไม่สามารถโหลดข้อมูลสินค้าได้</p>
-          {errorMessage && <p className="text-sm text-gray-600">{errorMessage}</p>}
-          <p className="text-base text-gray-700 mt-4">โปรดลองใหม่อีกครั้งในภายหลัง</p>
-        </div>
-      ) : (
-        <FilterProvider>
-          <div className="container mx-auto py-6">
-            <div className="flex gap-6">
-              <div className="w-1/5">
-                <Sidebar />
-              </div>
-
-              <div className="w-4/5">
-                {flashSaleProducts.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">ไม่พบสินค้า Flash Sale ในขณะนี้</p>
-                    <p className="text-sm text-gray-400 mt-2">โปรดกลับมาตรวจสอบในภายหลัง</p>
-                  </div>
-                ) : (
-                  <ProductGrid products={flashSaleProducts} key={Date.now()} />
-                )}
-
-                <div className="mt-8 p-4 border border-gray-200 rounded bg-gray-50 text-xs text-gray-500">
-                  <p>จำนวนสินค้าที่พบ: {flashSaleProducts.length}</p>
-                  <p>สถานะ: {isError ? 'มีข้อผิดพลาด' : 'สำเร็จ'}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </FilterProvider>
-      )}
-    </div>
-  );
+    <Head>
+      <title>FLASHSALE! | ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall</title>
+      <meta name="description" content="โปรโมชันลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง ของใช้ อาหาร ของเล่น และอุปกรณ์สำหรับสัตว์เลี้ยงคุณภาพดี ลดสูงสุด 50% จำนวนจำกัด" />
+      <meta name="keywords" content="flashsale, โปรโมชัน, ลดราคา, สินค้าสัตว์เลี้ยง, อาหารสัตว์, ของใช้สัตว์เลี้ยง" />
+    </Head>
+  )
 }
 
-export default FlashsaleComponent;
+export default function Page() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentPage = parseInt(searchParams.get('page') || '1');
+  const pageSize = 12;
+  
+  const [products, setProducts] = useState<FlashSaleProduct[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: currentPage,
+    pageSize: pageSize,
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>('endDate');
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  const sortOptions = [
+    { value: 'endDate', label: 'ใกล้หมดเวลา' },
+    { value: 'priceAsc', label: 'ราคาต่ำ - สูง' },
+    { value: 'priceDesc', label: 'ราคาสูง - ต่ำ' },
+    { value: 'discount', label: 'ส่วนลดมากสุด' }
+  ];
+  
+  const fetchFlashSaleProducts = async (page: number, sort: string) => {
+    try {
+      setLoading(true);
+
+      let url = `/api/flashsale?page=${page}&pageSize=${pageSize}`;
+
+      if(sort) {
+        url += `&sort=${sort}`;
+      }
+
+      const categoryParam = searchParams.get('category');
+      if(categoryParam) {
+        url += `&category=${categoryParam}`;
+      }
+      
+      const minPriceParam = searchParams.get('minPrice');
+      const maxPriceParam = searchParams.get('maxPrice');
+      if(minPriceParam) {
+        url += `&minPrice=${minPriceParam}`;
+      }
+      if(maxPriceParam) {
+        url += `&maxPrice=${maxPriceParam}`;
+      }
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setProducts(data.data);
+        if (data.pagination) {
+          setPagination(data.pagination);
+        } else {
+          setPagination({
+            page: currentPage,
+            pageSize: pageSize,
+            totalItems: data.data.length,
+            totalPages: Math.ceil(data.data.length / pageSize),
+            hasNextPage: false,
+            hasPrevPage: currentPage > 1
+          });
+        }
+      } else {
+        setError(data.error || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+        setProducts([]);
+      }
+    } catch (err) {
+      console.error('Error fetching flash sale products:', err);
+      setError('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFlashSaleProducts(currentPage, sortBy);
+  }, [currentPage, sortBy]);
+
+  const handlePageChange = (page: number) => {
+    router.push(`/flashsale?page=${page}&sort=${sortBy}`);
+  };
+
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    setIsSortMenuOpen(false);
+    router.push(`/flashsale?page=1&sort=${sort}`);
+  };
+
+  return (
+    <>
+      <FlashSaleSeo />
+      <div>
+        <div className="container mx-auto py-3">
+          <div className="flex items-center text-gray-600">
+            <Link href="/" className="flex items-center gap-2 hover:text-[#B86A4B]">
+              <ArrowLeft color="#5F6368" />
+              <span>หน้าแรก</span>
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-[#B86A4B]">FLASHSALES!</span>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <Image 
+            src="/images/Promotion.png" 
+            alt="โปรโมชันสินค้าสัตว์เลี้ยง KUMAま Mall" 
+            className="w-full max-w-[1255px] h-auto mx-auto"
+            width={1255}
+            height={220}
+            priority
+          />
+        </div>
+
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <Image 
+                src="/images/paw_icon.png" 
+                alt="Paw Icon" 
+                className="w-8 h-8 mr-2"
+                width={32}
+                height={32}
+              />
+              <span className="font-medium text-[#B86A4B] text-[24px]">สินค้า Flash Sale</span>
+            </div>
+            <div className="relative">
+              <button 
+                onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                className="flex items-center text-[#D6A985] text-[18px]"
+              >
+                <span className="mr-1">
+                  {sortOptions.find(option => option.value === sortBy)?.label || 'เรียงลำดับ'}
+                </span>
+                <ChevronDown size={16} />
+              </button>
+              
+              {isSortMenuOpen && (
+                <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => handleSortChange(option.value)}
+                      className={`block px-4 py-2 text-sm w-full text-left hover:bg-gray-100 ${
+                        sortBy === option.value ? 'text-[#D6A985] font-medium' : 'text-gray-700'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="border-b border-[#D6A985] mb-6"></div>
+          
+          <div className="flex flex-col md:flex-row">
+            <div className="w-full md:w-1/5 mb-6 md:mb-0">
+              <Sidebar />
+            </div>
+            <div className="w-full md:w-4/5">
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D6A985]"></div>
+                </div>
+              ) : error ? (
+                <div className="text-center text-red-500 py-8">
+                  <p>{error}</p>
+                  <button 
+                    className="mt-4 px-4 py-2 bg-[#D6A985] text-white rounded"
+                    onClick={() => fetchFlashSaleProducts(currentPage, sortBy)}
+                  >
+                    ลองใหม่
+                  </button>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-[#5F6368] text-xl">ไม่พบสินค้า Flash Sale ในขณะนี้</p>
+                </div>
+              ) : (
+                <>
+                  <ProductGrid products={products} />
+                  {pagination.totalPages > 1 && (
+                    <div className="flex justify-center mt-8">
+                      {/* เพิ่ม Pagination Component ถ้าจำเป็น */}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

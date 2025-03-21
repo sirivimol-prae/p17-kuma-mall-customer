@@ -10,7 +10,7 @@ interface FilterProviderProps {
 const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
   const [filters, setFilters] = useState<FilterOptions>({
     categories: [],
-    priceRange: [824, 8350],
+    priceRange: [0, 9999],
   });
 
   return (

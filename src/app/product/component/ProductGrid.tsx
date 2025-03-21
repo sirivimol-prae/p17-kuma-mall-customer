@@ -3,7 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import { ProductGroup } from '@/types/product';
-import AddToCartButton from './AddToCartButton';
 
 interface ProductGridProps {
   products: ProductGroup[];
