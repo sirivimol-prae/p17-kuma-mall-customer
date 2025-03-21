@@ -1,11 +1,29 @@
+// ปรับ src/app/flashsale/components/ProductGrid.tsx
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
-import { FlashSaleProduct } from '@/types/product';
+
+interface FlashSaleGroup {
+  id: number;
+  uuid: string;
+  title: string;
+  subname?: string;
+  price: number;
+  originalPrice: number;
+  discount: number;
+  quantity: number;
+  image?: string;
+  endDate: string | Date;
+  categories: {
+    id: number;
+    name: string;
+  }[];
+  productSku: string;
+}
 
 interface ProductGridProps {
-  products: FlashSaleProduct[];
+  products: FlashSaleGroup[];
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
@@ -18,6 +36,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   }
 
   const formatTimeRemaining = (endDate: string | Date): string => {
+    // คงไว้ซึ่งโค้ดของฟังก์ชันเดิม
     const end = new Date(endDate);
     const now = new Date();
     const diffMs = end.getTime() - now.getTime();
@@ -37,14 +56,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-8">
-      {products.map((product) => (
-        <div key={product.id} className="rounded-lg overflow-hidden relative w-full max-w-[235px] pb-3">
-          <Link href={`/product/${product.sku}`}>
+      {products.map((group) => (
+        <div key={group.id} className="rounded-lg overflow-hidden relative w-full max-w-[235px] pb-3">
+          <Link href={`/product/${group.id}`}>
             <div className="relative overflow-hidden rounded-[5px]">
-              {product.image ? (
+              {group.image ? (
                 <Image 
-                  src={product.image} 
-                  alt={product.title} 
+                  src={group.image} 
+                  alt={group.title} 
                   className="object-cover" 
                   width={235}
                   height={235}
@@ -61,11 +80,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
               )}
               
               {/* Discount Badge */}
-              {product.discount > 0 && (
+              {group.discount > 0 && (
                 <div className="absolute top-0 right-3">
                   <div className="bg-[#B86A4B] text-white p-2 border-2 border-white flex flex-col items-center justify-center rounded-none rounded-bl-[10px] rounded-br-[10px]" style={{width: '50px', height: '55px'}}>
                     <div className="text-[20px] font-bold">ลด</div>
-                    <div className="text-[20px] font-bold">{product.discount}%</div>
+                    <div className="text-[20px] font-bold">{group.discount}%</div>
                   </div>
                 </div>
               )}
@@ -75,12 +94,12 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
           <div className="p-0 mb-1">
             <div className="w-full">
               <div className="flex flex-col w-full mb-0">
-                <Link href={`/product/${product.sku}`}>
+                <Link href={`/product/${group.id}`}>
                   <h3 
                     className="font-medium text-[#5F6368] text-[24px] leading-tight w-full truncate cursor-pointer pl-0 pr-0 ml-0 mr-0 mb-0"
-                    title={product.title}
+                    title={group.title}
                   >
-                    {product.title}
+                    {group.title}
                   </h3>
                 </Link>
                 
@@ -91,10 +110,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
             </div>
             
             <div className="flex items-center mt-0.5">
-              <span className="text-[#B86A4B] font-bold text-[28px]">฿{product.price.toLocaleString()}</span>
-              {product.discount > 0 && (
+              <span className="text-[#B86A4B] font-bold text-[28px]">฿{group.price.toLocaleString()}</span>
+              {group.discount > 0 && (
                 <span className="text-[#A6A6A6] line-through ml-2 text-[18px]">
-                  ฿{product.originalPrice.toLocaleString()}
+                  ฿{group.originalPrice.toLocaleString()}
                 </span>
               )}
             </div>
@@ -123,8 +142,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
             
             {/* Flash Sale Timer */}
             <div className="text-center text-sm">
-              <span className="text-[#D6A985]">เหลือเวลาอีก: {formatTimeRemaining(product.endDate)}</span>
-              <span className="text-gray-500 ml-2">({product.quantity} ชิ้น)</span>
+              <span className="text-[#D6A985]">เหลือเวลาอีก: {formatTimeRemaining(group.endDate)}</span>
+              <span className="text-gray-500 ml-2">({group.quantity} ชิ้น)</span>
             </div>
           </div>
         </div>
