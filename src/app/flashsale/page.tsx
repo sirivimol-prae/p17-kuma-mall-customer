@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Sidebar from './components/Sidebar'
 import ProductGrid from './components/ProductGrid'
+import Pagination from '../product/component/Pagination'
 import { FlashSaleProduct, PaginationInfo } from '@/types/product'
 import Head from 'next/head'
 
@@ -37,8 +38,9 @@ export default function Page() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<string>('endDate');
+  const [sortBy, setSortBy] = useState<string>(searchParams.get('sort') || 'endDate');
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  
   const sortOptions = [
     { value: 'endDate', label: 'ใกล้หมดเวลา' },
     { value: 'priceAsc', label: 'ราคาต่ำ - สูง' },
@@ -46,14 +48,15 @@ export default function Page() {
     { value: 'discount', label: 'ส่วนลดมากสุด' }
   ];
   
-  const fetchFlashSaleProducts = async (page: number, sort: string) => {
+  const fetchFlashSaleProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
 
-      let url = `/api/flashsale?page=${page}&pageSize=${pageSize}`;
+      let url = `/api/flashsale?page=${currentPage}&pageSize=${pageSize}`;
 
-      if(sort) {
-        url += `&sort=${sort}`;
+      if(sortBy) {
+        url += `&sort=${sortBy}`;
       }
 
       const categoryParam = searchParams.get('category');
@@ -69,6 +72,8 @@ export default function Page() {
       if(maxPriceParam) {
         url += `&maxPrice=${maxPriceParam}`;
       }
+      
+      console.log('Fetching from:', url);
       
       const response = await fetch(url);
       
@@ -106,17 +111,25 @@ export default function Page() {
   };
 
   useEffect(() => {
-    fetchFlashSaleProducts(currentPage, sortBy);
-  }, [currentPage, sortBy]);
+    fetchFlashSaleProducts();
+  }, [currentPage, sortBy, searchParams]);
 
   const handlePageChange = (page: number) => {
-    router.push(`/flashsale?page=${page}&sort=${sortBy}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('page', page.toString());
+    
+    router.push(`/flashsale?${params.toString()}`);
   };
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort);
     setIsSortMenuOpen(false);
-    router.push(`/flashsale?page=1&sort=${sort}`);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('sort', sort);
+    params.set('page', '1');
+    
+    router.push(`/flashsale?${params.toString()}`);
   };
 
   return (
@@ -202,22 +215,24 @@ export default function Page() {
                   <p>{error}</p>
                   <button 
                     className="mt-4 px-4 py-2 bg-[#D6A985] text-white rounded"
-                    onClick={() => fetchFlashSaleProducts(currentPage, sortBy)}
+                    onClick={() => fetchFlashSaleProducts()}
                   >
                     ลองใหม่
                   </button>
                 </div>
               ) : products.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-[#5F6368] text-xl">ไม่พบสินค้า Flash Sale ในขณะนี้</p>
+                  <p className="text-[#5F6368] text-xl">ไม่พบสินค้า Flash Sale ที่ตรงกับเงื่อนไขในขณะนี้</p>
                 </div>
               ) : (
                 <>
                   <ProductGrid products={products} />
                   {pagination.totalPages > 1 && (
-                    <div className="flex justify-center mt-8">
-                      {/* เพิ่ม Pagination Component ถ้าจำเป็น */}
-                    </div>
+                    <Pagination 
+                      currentPage={pagination.page} 
+                      totalPages={pagination.totalPages} 
+                      onPageChange={handlePageChange} 
+                    />
                   )}
                 </>
               )}

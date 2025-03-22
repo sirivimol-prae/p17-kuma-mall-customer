@@ -10,16 +10,13 @@ export async function GET(request: Request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '12');
     const skip = (page - 1) * pageSize;
     const sortBy = searchParams.get('sort') || 'latest';
-    
     let minPrice = parseInt(searchParams.get('minPrice') || '0');
     let maxPrice = parseInt(searchParams.get('maxPrice') || '999999');
-    
     const collectionParam = searchParams.get('collection');
     let collectionIds: number[] = [];
     if (collectionParam) {
       collectionIds = collectionParam.split(',').map(id => parseInt(id));
     }
-    
     let whereCondition: any = {
       products: {
         some: {
@@ -32,7 +29,6 @@ export async function GET(request: Request) {
         }
       }
     };
-    
     if (collectionIds.length > 0) {
       whereCondition.group_collections = {
         some: {
@@ -42,8 +38,8 @@ export async function GET(request: Request) {
         }
       };
     }
-    
     let orderBy: any = {};
+
     switch (sortBy) {
       case 'priceAsc':
         orderBy = { id: 'asc' };
@@ -84,7 +80,6 @@ export async function GET(request: Request) {
       skip,
       take: pageSize
     });
-
     const totalGroups = await prisma.group_product.count({
       where: whereCondition
     });
@@ -95,12 +90,12 @@ export async function GET(request: Request) {
       const minGroupPrice = prices.length > 0 ? Math.min(...prices) : 0;
       const hasDiscount = productsInPriceRange.some(p => p!.make_price !== null && p!.make_price < p!.price_origin);
       const imageUrl = group.img_group_product?.img_url_group?.[0] || null;
-      
+
       return {
         id: group.id,
         uuid: group.uuid,
         name: group.group_name,
-        subname: "",
+        subname: group.subname || "",
         image: imageUrl,
         collections: group.group_collections.map(gc => ({
           id: gc.collection.id,

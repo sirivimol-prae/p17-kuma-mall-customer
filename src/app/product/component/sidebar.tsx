@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface Collection {
   id: number;
@@ -20,10 +20,26 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const createQueryString = (params: Record<string, string | null>) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null) {
+        newSearchParams.delete(key);
+      } else {
+        newSearchParams.set(key, value);
+      }
+    });
+    
+    return newSearchParams.toString();
+  };
+
   const collectionParam = searchParams.get('collection');
   const minPriceParam = searchParams.get('minPrice');
   const maxPriceParam = searchParams.get('maxPrice');
+
   const [priceRange, setPriceRange] = useState<[number, number]>([
     minPriceParam ? parseInt(minPriceParam) : 0,
     maxPriceParam ? parseInt(maxPriceParam) : 9999
@@ -31,14 +47,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const [selectedCollections, setSelectedCollections] = useState<number[]>(
     collectionParam ? collectionParam.split(',').map(id => parseInt(id)) : []
   );
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [activeHandle, setActiveHandle] = useState<'min' | 'max' | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+  const [error, setError] = useState<string | null>(null);
+
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [activeHandle, setActiveHandle] = useState<'min' | 'max' | null>(null);
+  const sliderRef = React.useRef<HTMLDivElement>(null);
+  const minPrice = 0;
+  const maxPrice = 9999;
+
   const serviceCategories = [
     { id: 'new', label: 'สินค้าเข้าใหม่' },
     { id: 'sale', label: 'Flash Sale!' },
@@ -47,14 +65,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     { id: 'set', label: 'เซ็ตสินค้า' },
   ];
 
-  const minPrice = 0;
-  const maxPrice = 9999; 
-  
   useEffect(() => {
     const fetchCollections = async () => {
       try {
         setLoading(true);
-        setError(false);
         const response = await fetch('/api/collections');
         
         if (!response.ok) {
@@ -66,12 +80,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
         if (data.success && data.data.length > 0) {
           setCollections(data.data);
         } else {
-          setError(true);
+          setError(data.error || 'ไม่สามารถโหลดคอลเลคชั่นได้');
           setCollections([]);
         }
       } catch (error) {
         console.error('Error fetching collections:', error);
-        setError(true);
+        setError(error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการโหลดคอลเลคชั่น');
         setCollections([]);
       } finally {
         setLoading(false);
@@ -81,23 +95,73 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     fetchCollections();
   }, []);
 
+  const applyFilters = () => {
+    let queryParams: Record<string, string | null> = {};
+
+    if (selectedCollections.length > 0) {
+      queryParams.collection = selectedCollections.join(',');
+    } else {
+      queryParams.collection = null;
+    }
+
+    queryParams.minPrice = priceRange[0].toString();
+    queryParams.maxPrice = priceRange[1].toString();
+
+    queryParams.page = '1';
+    
+    const sortParam = searchParams.get('sort');
+    if (sortParam) {
+      queryParams.sort = sortParam;
+    }
+
+    const queryString = createQueryString(queryParams);
+    router.push(`${pathname}?${queryString}`);
+
+    if (onFilterChange) {
+      onFilterChange({
+        collections: selectedCollections,
+        priceRange: priceRange
+      });
+    }
+  };
+
   const handleCollectionChange = (collectionId: number) => {
     setSelectedCollections(prev => {
-      let newCollections;
-      if (prev.includes(collectionId)) {
-        newCollections = prev.filter(id => id !== collectionId);
-      } else {
-        newCollections = [...prev, collectionId];
-      }
+      const newCollections = prev.includes(collectionId)
+        ? prev.filter(id => id !== collectionId)
+        : [...prev, collectionId];
 
-      updateUrlWithFilters(newCollections, priceRange);
+      setTimeout(() => {
 
-      if (onFilterChange) {
-        onFilterChange({
-          collections: newCollections,
-          priceRange: priceRange
-        });
-      }
+        const newSelectedCollections = prev.includes(collectionId)
+          ? prev.filter(id => id !== collectionId)
+          : [...prev, collectionId];
+          
+        let queryParams: Record<string, string | null> = {};
+        if (newSelectedCollections.length > 0) {
+          queryParams.collection = newSelectedCollections.join(',');
+        } else {
+          queryParams.collection = null;
+        }
+        queryParams.minPrice = priceRange[0].toString();
+        queryParams.maxPrice = priceRange[1].toString();
+        queryParams.page = '1';
+        
+        const sortParam = searchParams.get('sort');
+        if (sortParam) {
+          queryParams.sort = sortParam;
+        }
+        
+        const queryString = createQueryString(queryParams);
+        router.push(`${pathname}?${queryString}`);
+        
+        if (onFilterChange) {
+          onFilterChange({
+            collections: newSelectedCollections,
+            priceRange: priceRange
+          });
+        }
+      }, 0);
       
       return newCollections;
     });
@@ -129,23 +193,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
-    setActiveHandle(null);
+    if (isDragging) {
+      setIsDragging(false);
+      setActiveHandle(null);
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+      setTimeout(() => {
+        applyFilters();
+      }, 100);
     }
-    
-    timeoutRef.current = setTimeout(() => {
-      updateUrlWithFilters(selectedCollections, priceRange);
-
-      if (onFilterChange) {
-        onFilterChange({
-          collections: selectedCollections,
-          priceRange: priceRange
-        });
-      }
-    }, 500);
   };
 
   useEffect(() => {
@@ -157,55 +212,36 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
     };
-  }, [isDragging, priceRange, selectedCollections]);
-
-  const updateUrlWithFilters = (collections: number[], prices: [number, number]) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    params.set('page', '1');
-
-    if (collections.length > 0) {
-      params.set('collection', collections.join(','));
-    } else {
-      params.delete('collection');
-    }
-
-    params.set('minPrice', prices[0].toString());
-    params.set('maxPrice', prices[1].toString());
-
-    const sortBy = searchParams.get('sort');
-    if (sortBy) {
-      params.set('sort', sortBy);
-    }
-
-    router.push(`/product?${params.toString()}`);
-  };
+  }, [isDragging, priceRange]);
 
   const handleReset = () => {
     setSelectedCollections([]);
     setPriceRange([minPrice, maxPrice]);
 
-    const params = new URLSearchParams();
-    params.set('page', '1');
-
-    const sortBy = searchParams.get('sort');
-    if (sortBy) {
-      params.set('sort', sortBy);
-    }
-
-    router.push(`/product?${params.toString()}`);
-
-    if (onFilterChange) {
-      onFilterChange({
-        collections: [],
-        priceRange: [minPrice, maxPrice]
-      });
-    }
+    setTimeout(() => {
+      const sortParam = searchParams.get('sort');
+      const queryParams: Record<string, string | null> = {
+        collection: null,
+        minPrice: minPrice.toString(),
+        maxPrice: maxPrice.toString(),
+        page: '1'
+      };
+      
+      if (sortParam) {
+        queryParams.sort = sortParam;
+      }
+      
+      const queryString = createQueryString(queryParams);
+      router.push(`${pathname}?${queryString}`);
+      
+      if (onFilterChange) {
+        onFilterChange({
+          collections: [],
+          priceRange: [minPrice, maxPrice]
+        });
+      }
+    }, 0);
   };
 
   const minHandlePosition = `${((priceRange[0] - minPrice) / (maxPrice - minPrice)) * 100}%`;
@@ -226,7 +262,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
             ))}
           </div>
         ) : error || collections.length === 0 ? (
-          <div className="text-[#5F6368] text-[16px]">ไม่มีหมวดหมู่</div>
+          <div className="text-[#5F6368] text-[16px]">{error || 'ไม่มีคอลเลคชั่น'}</div>
         ) : (
           <div className="space-y-2">
             {collections.map((collection) => (
@@ -294,8 +330,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
               <input
                 type="checkbox"
                 id={category.id}
-                checked={false} 
-                onChange={() => {}}
                 className="h-4 w-4 text-[#D6A985] rounded border-gray-300 focus:ring-[#D6A985]"
               />
               <label htmlFor={category.id} className="ml-2 text-[16px] text-[#5F6368]">

@@ -16,8 +16,9 @@ export interface Collection {
 
 export interface FlashSaleProduct {
   id: number;
-  sku: string;
+  uuid: string;
   title: string;
+  subname?: string;
   price: number;
   originalPrice: number;
   discount: number;
@@ -28,6 +29,8 @@ export interface FlashSaleProduct {
     id: number;
     name: string;
   }[];
+  productSku: string;
+  isFlashSale?: boolean;
 }
 
 export interface ProductGroup {
@@ -64,6 +67,7 @@ export interface ProductsResponse {
 export interface FlashSaleResponse {
   success: boolean;
   data: FlashSaleProduct[];
+  pagination: PaginationInfo;
   error?: string;
 }
 

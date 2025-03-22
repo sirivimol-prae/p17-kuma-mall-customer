@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef, useEffect, createContext } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface Category {
   id: number;
@@ -14,21 +14,26 @@ export interface FilterOptions {
   priceRange: [number, number];
 }
 
-export const FilterContext = createContext<{
-  filters: FilterOptions;
-  setFilters: (filters: FilterOptions) => void;
-}>({
-  filters: { categories: [], priceRange: [0, 9999] },
-  setFilters: () => {},
-});
-
 interface SidebarProps {
   onFilterChange?: (filters: FilterOptions) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const createQueryString = (params: Record<string, string | null>) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString());
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null) {
+        newSearchParams.delete(key);
+      } else {
+        newSearchParams.set(key, value);
+      }
+    });
+    
+    return newSearchParams.toString();
+  };
   const categoryParam = searchParams.get('category');
   const minPriceParam = searchParams.get('minPrice');
   const maxPriceParam = searchParams.get('maxPrice');
@@ -39,22 +44,19 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const [selectedCategories, setSelectedCategories] = useState<number[]>(
     categoryParam ? categoryParam.split(',').map(id => parseInt(id)) : []
   );
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [activeHandle, setActiveHandle] = useState<'min' | 'max' | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
+  const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [activeHandle, setActiveHandle] = useState<'min' | 'max' | null>(null);
+  const sliderRef = React.useRef<HTMLDivElement>(null);
   const minPrice = 0;
-  const maxPrice = 9999; 
-  
+  const maxPrice = 9999;
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        setError(false);
         const response = await fetch('/api/categories');
         
         if (!response.ok) {
@@ -66,12 +68,12 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
         if (data.success && data.data.length > 0) {
           setCategories(data.data);
         } else {
-          setError(true);
+          setError(data.error || 'ไม่สามารถโหลดหมวดหมู่ได้');
           setCategories([]);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
-        setError(true);
+        setError(error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการโหลดหมวดหมู่');
         setCategories([]);
       } finally {
         setLoading(false);
@@ -81,23 +83,72 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     fetchCategories();
   }, []);
 
+  const applyFilters = () => {
+    let queryParams: Record<string, string | null> = {};
+
+    if (selectedCategories.length > 0) {
+      queryParams.category = selectedCategories.join(',');
+    } else {
+      queryParams.category = null;
+    }
+    
+    queryParams.minPrice = priceRange[0].toString();
+    queryParams.maxPrice = priceRange[1].toString();
+
+    queryParams.page = '1';
+    
+    const sortParam = searchParams.get('sort');
+    if (sortParam) {
+      queryParams.sort = sortParam;
+    }
+
+    const queryString = createQueryString(queryParams);
+    router.push(`${pathname}?${queryString}`);
+
+    if (onFilterChange) {
+      onFilterChange({
+        categories: selectedCategories,
+        priceRange: priceRange
+      });
+    }
+  };
+
   const handleCategoryChange = (categoryId: number) => {
     setSelectedCategories(prev => {
-      let newCategories;
-      if (prev.includes(categoryId)) {
-        newCategories = prev.filter(id => id !== categoryId);
-      } else {
-        newCategories = [...prev, categoryId];
-      }
+      const newCategories = prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId];
 
-      updateUrlWithFilters(newCategories, priceRange);
-
-      if (onFilterChange) {
-        onFilterChange({
-          categories: newCategories,
-          priceRange: priceRange
-        });
-      }
+      setTimeout(() => {
+        const newSelectedCategories = prev.includes(categoryId)
+          ? prev.filter(id => id !== categoryId)
+          : [...prev, categoryId];
+          
+        let queryParams: Record<string, string | null> = {};
+        if (newSelectedCategories.length > 0) {
+          queryParams.category = newSelectedCategories.join(',');
+        } else {
+          queryParams.category = null;
+        }
+        queryParams.minPrice = priceRange[0].toString();
+        queryParams.maxPrice = priceRange[1].toString();
+        queryParams.page = '1';
+        
+        const sortParam = searchParams.get('sort');
+        if (sortParam) {
+          queryParams.sort = sortParam;
+        }
+        
+        const queryString = createQueryString(queryParams);
+        router.push(`${pathname}?${queryString}`);
+        
+        if (onFilterChange) {
+          onFilterChange({
+            categories: newSelectedCategories,
+            priceRange: priceRange
+          });
+        }
+      }, 0);
       
       return newCategories;
     });
@@ -129,23 +180,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
-    setActiveHandle(null);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    if (isDragging) {
+      setIsDragging(false);
+      setActiveHandle(null);
+      
+      setTimeout(() => {
+        applyFilters();
+      }, 100);
     }
-    
-    timeoutRef.current = setTimeout(() => {
-      updateUrlWithFilters(selectedCategories, priceRange);
-
-      if (onFilterChange) {
-        onFilterChange({
-          categories: selectedCategories,
-          priceRange: priceRange
-        });
-      }
-    }, 500);
   };
 
   useEffect(() => {
@@ -157,55 +199,36 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
     };
-  }, [isDragging, priceRange, selectedCategories]);
-
-  const updateUrlWithFilters = (categories: number[], prices: [number, number]) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    params.set('page', '1');
-
-    if (categories.length > 0) {
-      params.set('category', categories.join(','));
-    } else {
-      params.delete('category');
-    }
-
-    params.set('minPrice', prices[0].toString());
-    params.set('maxPrice', prices[1].toString());
-
-    const sortBy = searchParams.get('sort');
-    if (sortBy) {
-      params.set('sort', sortBy);
-    }
-
-    router.push(`/flashsale?${params.toString()}`);
-  };
+  }, [isDragging, priceRange]);
 
   const handleReset = () => {
     setSelectedCategories([]);
     setPriceRange([minPrice, maxPrice]);
 
-    const params = new URLSearchParams();
-    params.set('page', '1');
-
-    const sortBy = searchParams.get('sort');
-    if (sortBy) {
-      params.set('sort', sortBy);
-    }
-
-    router.push(`/flashsale?${params.toString()}`);
-
-    if (onFilterChange) {
-      onFilterChange({
-        categories: [],
-        priceRange: [minPrice, maxPrice]
-      });
-    }
+    setTimeout(() => {
+      const sortParam = searchParams.get('sort');
+      const queryParams: Record<string, string | null> = {
+        category: null,
+        minPrice: minPrice.toString(),
+        maxPrice: maxPrice.toString(),
+        page: '1'
+      };
+      
+      if (sortParam) {
+        queryParams.sort = sortParam;
+      }
+      
+      const queryString = createQueryString(queryParams);
+      router.push(`${pathname}?${queryString}`);
+      
+      if (onFilterChange) {
+        onFilterChange({
+          categories: [],
+          priceRange: [minPrice, maxPrice]
+        });
+      }
+    }, 0);
   };
 
   const minHandlePosition = `${((priceRange[0] - minPrice) / (maxPrice - minPrice)) * 100}%`;
@@ -226,7 +249,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
             ))}
           </div>
         ) : error || categories.length === 0 ? (
-          <div className="text-[#5F6368] text-[16px]">ไม่มีหมวดหมู่</div>
+          <div className="text-[#5F6368] text-[16px]">{error || 'ไม่มีหมวดหมู่'}</div>
         ) : (
           <div className="space-y-2">
             {categories.map((category) => (

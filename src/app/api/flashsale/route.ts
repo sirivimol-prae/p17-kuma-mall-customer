@@ -1,4 +1,3 @@
-// ปรับปรุง src/app/api/flashsale/route.ts
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
@@ -11,53 +10,51 @@ export async function GET(request: Request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '12');
     const skip = (page - 1) * pageSize;
     const sortBy = searchParams.get('sort') || 'endDate';
-  
     let minPrice = parseInt(searchParams.get('minPrice') || '0');
     let maxPrice = parseInt(searchParams.get('maxPrice') || '999999');
-    
     const categoryParam = searchParams.get('category');
     let categoryIds: number[] = [];
     if (categoryParam) {
       categoryIds = categoryParam.split(',').map(id => parseInt(id));
+      console.log('Filtering by categories:', categoryIds);
     }
-
-    // 1. ค้นหา group_product ที่มีสินค้าที่มี flash_sale
-    const groupsWithFlashSale = await prisma.group_product.findMany({
-      where: {
-        products: {
-          some: {
-            product: {
-              AND: [
-                {
-                  flash_sale: {
-                    isNot: null
-                  }
-                },
-                {
-                  flash_sale: {
-                    status: 'active',
-                    quantity: { gt: 0 },
-                    end_date: { gt: new Date() },
-                    flash_sale_price: {
-                      gte: minPrice,
-                      lte: maxPrice
-                    }
+    const whereCondition: any = {
+      products: {
+        some: {
+          product: {
+            AND: [
+              {
+                flash_sale: {
+                  isNot: null
+                }
+              },
+              {
+                flash_sale: {
+                  status: 'active',
+                  quantity: { gt: 0 },
+                  end_date: { gt: new Date() },
+                  flash_sale_price: {
+                    gte: minPrice,
+                    lte: maxPrice
                   }
                 }
-              ]
-            }
-          }
-        },
-        ...(categoryIds.length > 0 ? {
-          group_categories: {
-            some: {
-              category_id: {
-                in: categoryIds
               }
-            }
+            ]
           }
-        } : {})
-      },
+        }
+      }
+    };
+    if (categoryIds.length > 0) {
+      whereCondition.group_categories = {
+        some: {
+          category_id: {
+            in: categoryIds
+          }
+        }
+      };
+    }
+    const groupsWithFlashSale = await prisma.group_product.findMany({
+      where: whereCondition,
       include: {
         img_group_product: true,
         group_categories: {
@@ -78,49 +75,10 @@ export async function GET(request: Request) {
       skip,
       take: pageSize
     });
-
-    // 2. นับจำนวนทั้งหมดสำหรับ pagination
     const totalGroups = await prisma.group_product.count({
-      where: {
-        products: {
-          some: {
-            product: {
-              AND: [
-                {
-                  flash_sale: {
-                    isNot: null
-                  }
-                },
-                {
-                  flash_sale: {
-                    status: 'active',
-                    quantity: { gt: 0 },
-                    end_date: { gt: new Date() },
-                    flash_sale_price: {
-                      gte: minPrice,
-                      lte: maxPrice
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        },
-        ...(categoryIds.length > 0 ? {
-          group_categories: {
-            some: {
-              category_id: {
-                in: categoryIds
-              }
-            }
-          }
-        } : {})
-      }
+      where: whereCondition
     });
-
-    // 3. แปลงข้อมูลให้ตรงตามที่ต้องการ
     const formattedGroups = groupsWithFlashSale.map(group => {
-      // หาสินค้าที่มี flash_sale และตรงตามเงื่อนไข
       const productsWithFlashSale = group.products
         .map(p => p.product)
         .filter(product => 
@@ -133,10 +91,9 @@ export async function GET(request: Request) {
         );
 
       if (productsWithFlashSale.length === 0) {
-        return null; // ข้าม group ที่ไม่มี flash sale ที่ตรงเงื่อนไข
+        return null;
       }
 
-      // เรียงลำดับตามเงื่อนไข
       let sortedProducts = [...productsWithFlashSale];
       if (sortBy === 'priceAsc') {
         sortedProducts.sort((a, b) => a.flash_sale!.flash_sale_price - b.flash_sale!.flash_sale_price);
@@ -145,17 +102,13 @@ export async function GET(request: Request) {
       } else if (sortBy === 'discount') {
         sortedProducts.sort((a, b) => b.flash_sale!.flash_sale_per - a.flash_sale!.flash_sale_per);
       } else {
-        // 'endDate' เป็นค่าเริ่มต้น
         sortedProducts.sort((a, b) => 
           new Date(a.flash_sale!.end_date).getTime() - new Date(b.flash_sale!.end_date).getTime()
         );
       }
-
-      // เลือกสินค้าตัวแรกหลังเรียงลำดับ
       const productWithFlashSale = sortedProducts[0];
       const flashSale = productWithFlashSale.flash_sale;
       const imageUrl = group.img_group_product?.img_url_group?.[0] || null;
-      
       return {
         id: group.id,
         uuid: group.uuid,
@@ -175,7 +128,6 @@ export async function GET(request: Request) {
         isFlashSale: true
       };
     }).filter(Boolean);
-
     const totalPages = Math.ceil(totalGroups / pageSize);
     const pagination = {
       page,
