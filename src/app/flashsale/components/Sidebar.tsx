@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useFilterContext } from './FilterProvider';
 
 interface Category {
   id: number;
@@ -39,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const maxPriceParam = searchParams.get('maxPrice');
   const [priceRange, setPriceRange] = useState<[number, number]>([
     minPriceParam ? parseInt(minPriceParam) : 0,
-    maxPriceParam ? parseInt(maxPriceParam) : 9999
+    maxPriceParam ? parseInt(maxPriceParam) : 999
   ]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>(
     categoryParam ? categoryParam.split(',').map(id => parseInt(id)) : []
@@ -51,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onFilterChange }) => {
   const [activeHandle, setActiveHandle] = useState<'min' | 'max' | null>(null);
   const sliderRef = React.useRef<HTMLDivElement>(null);
   const minPrice = 0;
-  const maxPrice = 9999;
+  const maxPrice = 999;
 
   useEffect(() => {
     const fetchCategories = async () => {

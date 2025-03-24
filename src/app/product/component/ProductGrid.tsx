@@ -17,6 +17,26 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
     );
   }
 
+  const formatTimeRemaining = (endDate: string | Date | undefined): string => {
+    if (!endDate) return "";
+    
+    const end = new Date(endDate);
+    const now = new Date();
+    const diffMs = end.getTime() - now.getTime();
+    
+    if (diffMs <= 0) return "หมดเวลา";
+    
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) {
+      return `${days} วัน ${hours} ชั่วโมง`;
+    }
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ชั่วโมง`;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-8">
       {products.map((product) => (
@@ -41,6 +61,15 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                   </div>
                 </div>
               )}
+
+              {product.isFlashSale && product.discount && product.discount > 0 && (
+                <div className="absolute top-0 right-3">
+                  <div className="bg-[#B86A4B] text-white p-2 border-2 border-white flex flex-col items-center justify-center rounded-none rounded-bl-[10px] rounded-br-[10px]" style={{width: '50px', height: '55px'}}>
+                    <div className="text-[20px] font-bold">ลด</div>
+                    <div className="text-[20px] font-bold">{product.discount}%</div>
+                  </div>
+                </div>
+              )}
             </div>
           </Link>
           
@@ -57,20 +86,20 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                 </Link>
                 
                 <div className="inline-block bg-[#D6A985] text-white text-[16px] px-2 py-0 rounded-md w-fit ml-0">
-                  KUMAま FRIEND
+                  {product.isFlashSale ? "FLASH SALE" : "KUMAま FRIEND"}
                 </div>
               </div>
             </div>
             
             <div className="flex items-center mt-0.5">
               <span className="text-[#B86A4B] font-bold text-[28px]">฿{product.price.toLocaleString()}</span>
-              {product.hasDiscount && (
+              {(product.hasDiscount || product.isFlashSale) && (
                 <span className="text-[#A6A6A6] line-through ml-2 text-[18px]">
                   ฿{product.originalPrice.toLocaleString()}
                 </span>
               )}
             </div>
-            
+
             <div className="flex items-center mt-0 mb-1">
               <div className="flex text-yellow-400 leading-none text-[22px]">
                 <span>★</span>
@@ -92,6 +121,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
                 </button>
               </div>
             </div>
+            
           </div>
         </div>
       ))}

@@ -23,7 +23,7 @@ export interface FlashSaleProduct {
   originalPrice: number;
   discount: number;
   quantity: number;
-  image?: string;
+  image?: string | null;
   endDate: string | Date;
   categories: {
     id: number;
@@ -46,6 +46,11 @@ export interface ProductGroup {
   price: number;
   originalPrice: number;
   hasDiscount: boolean;
+  isFlashSale?: boolean;
+  flashSalePrice?: number;
+  discount?: number;
+  endDate?: string | Date;
+  quantity?: number;
 }
 
 export interface PaginationInfo {
@@ -68,17 +73,5 @@ export interface FlashSaleResponse {
   success: boolean;
   data: FlashSaleProduct[];
   pagination: PaginationInfo;
-  error?: string;
-}
-
-export interface CategoriesResponse {
-  success: boolean;
-  data: Category[];
-  error?: string;
-}
-
-export interface CollectionsResponse {
-  success: boolean;
-  data: Collection[];
   error?: string;
 }
