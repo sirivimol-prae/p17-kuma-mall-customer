@@ -46,8 +46,8 @@ interface OrderItem {
       items: [
         {
           id: 1,
-          name: 'KUMA ま ที่ฝนเล็บน้องแมวรูปโคม',
-          image: '/images/bowl.png',
+          name: 'KUMAま คอกสุนัขพับได้',
+          image: '/images/stall.png',
           size: 'M : 74*74*45 CM',
           color: 'น้ำเงิน-ครีม',
           quantity: 1,
@@ -56,8 +56,8 @@ interface OrderItem {
         },
         {
           id: 2,
-          name: 'KUMA ま KUMAま หมอนหนุนน้องหมา',
-          image: '/images/Pillow.png',
+          name: 'KUMAま ที่นอนสัตว์เลี้ยง',
+          image: '/images/bed2.png',
           size: 'M : 74*74*45 CM',
           color: 'ขาว-น้ำตาล',
           quantity: 1,
@@ -66,9 +66,9 @@ interface OrderItem {
         },
         {
           id: 3,
-          name: 'KUMA ま ทรายแมวแถวบ้าน',
-          image: '/images/kasty.png',
-          type: 'Urinary ลดนิ่ว',
+          name: 'KUMAま โรลครีมลับเล็บ',
+          image: '/images/bed.png',
+          type: 'น้ำตาล',
           quantity: 1,
           originalPrice: 150,
           price: 139
