@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Sidebar from './Sidebar';
-import ProductGrid from './ProductGrid';
+import ProductGrid from '../../../components/FlashSale/FlashSaleProductGrid';
 import Pagination from '../../product/component/Pagination';
 import { FlashSaleProduct, PaginationInfo } from '@/types/product';
 
@@ -29,6 +29,7 @@ export default function FlashSalePageClient({
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>(initialSort);
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
   
   const sortOptions = [
     { value: 'endDate', label: 'ใกล้หมดเวลา' },
@@ -38,63 +39,112 @@ export default function FlashSalePageClient({
   ];
 
   useEffect(() => {
+    if (!products || products.length === 0) return;
+
+    const productsWithEndDate = products.filter(p => p.endDate);
+    if (productsWithEndDate.length === 0) return;
+    
+    const latestProduct = [...productsWithEndDate].sort((a, b) => {
+      const dateA = a.endDate ? new Date(a.endDate).getTime() : 0;
+      const dateB = b.endDate ? new Date(b.endDate).getTime() : 0;
+      return dateB - dateA;
+    })[0];
+    
+    if (latestProduct && latestProduct.endDate) {
+      const endTime = new Date(latestProduct.endDate).getTime();
+
+      const updateCountdown = () => {
+        const now = new Date().getTime();
+        const timeRemaining = endTime - now;
+        
+        if (timeRemaining <= 0) {
+          setCountdown({ hours: 0, minutes: 0, seconds: 0 });
+          return;
+        }
+        
+        const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+        
+        setCountdown({ hours, minutes, seconds });
+      };
+
+      updateCountdown();
+
+      const timer = setInterval(updateCountdown, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [products]);
+
+  useEffect(() => {
     const fetchFlashSaleProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+      const currentPage = parseInt(searchParams.get('page') || '1');
+      const currentSort = searchParams.get('sort') || 'endDate';
+      const categoryParam = searchParams.get('category');
+      const minPriceParam = searchParams.get('minPrice');
+      const maxPriceParam = searchParams.get('maxPrice');
+      const pageChanged = currentPage !== pagination.page;
+      const sortChanged = currentSort !== sortBy;
+      const hasFilters = categoryParam || minPriceParam || maxPriceParam;
 
-        const currentPage = parseInt(searchParams.get('page') || '1');
-        let url = `/api/flashsale?page=${currentPage}&pageSize=${pagination.pageSize}`;
+      if (pageChanged || sortChanged || hasFilters) {
+        try {
+          setLoading(true);
+          setError(null);
 
-        if(sortBy) {
-          url += `&sort=${sortBy}`;
-        }
+          let url = `/api/flashsale?page=${currentPage}&pageSize=${pagination.pageSize}`;
 
-        const categoryParam = searchParams.get('category');
-        if(categoryParam) {
-          url += `&category=${categoryParam}`;
-        }
-        
-        const minPriceParam = searchParams.get('minPrice');
-        const maxPriceParam = searchParams.get('maxPrice');
-        if(minPriceParam) {
-          url += `&minPrice=${minPriceParam}`;
-        }
-        if(maxPriceParam) {
-          url += `&maxPrice=${maxPriceParam}`;
-        }
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          setProducts(data.data);
-          if (data.pagination) {
-            setPagination(data.pagination);
+          if(currentSort) {
+            url += `&sort=${currentSort}`;
           }
-        } else {
-          setError(data.error || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+
+          if(categoryParam) {
+            url += `&category=${categoryParam}`;
+          }
+          
+          if(minPriceParam) {
+            url += `&minPrice=${minPriceParam}`;
+          }
+          
+          if(maxPriceParam) {
+            url += `&maxPrice=${maxPriceParam}`;
+          }
+          
+          const response = await fetch(url);
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            setProducts(data.data);
+            if (data.pagination) {
+              setPagination(data.pagination);
+            }
+          } else {
+            setError(data.error || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
+            setProducts([]);
+          }
+        } catch (err) {
+          console.error('Error fetching flash sale products:', err);
+          setError('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
           setProducts([]);
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error('Error fetching flash sale products:', err);
-        setError('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
-        setProducts([]);
-      } finally {
-        setLoading(false);
       }
     };
-    const pageChanged = parseInt(searchParams.get('page') || '1') !== pagination.page;
-    const sortChanged = searchParams.get('sort') !== sortBy;
-    const filtersChanged = searchParams.get('category') || searchParams.get('minPrice') || searchParams.get('maxPrice');
     
-    if (pageChanged || sortChanged || filtersChanged) {
-      fetchFlashSaleProducts();
+    fetchFlashSaleProducts();
+  }, [searchParams, pagination.pageSize]);
+
+  useEffect(() => {
+    const urlSort = searchParams.get('sort');
+    if (urlSort && urlSort !== sortBy) {
+      setSortBy(urlSort);
     }
   }, [searchParams, sortBy]);
 
@@ -116,10 +166,12 @@ export default function FlashSalePageClient({
     router.push(`/flashsale?${params.toString()}`);
   };
 
+  const formatNumber = (num: number) => String(num).padStart(2, '0');
+
   return (
     <div className="container mx-auto">
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <Image 
             src="/images/paw_icon.png" 
             alt="Paw Icon" 
@@ -128,6 +180,22 @@ export default function FlashSalePageClient({
             height={32}
           />
           <span className="font-medium text-[#B86A4B] text-[24px]">สินค้า Flash Sale</span>
+
+          <div className="flex items-center ml-4">
+            <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+              <span className="text-white font-bold">F</span>
+            </div>
+            <span className="text-orange-500 font-medium ml-1">FLASH SALE</span>
+            <span className="text-xs text-gray-500 ml-1">(Website Only)</span>
+            
+            <div className="flex gap-1 ml-2">
+              <span className="bg-gray-700 text-white text-sm px-1 rounded">{formatNumber(countdown.hours)}</span>
+              <span className="text-gray-700">:</span>
+              <span className="bg-gray-700 text-white text-sm px-1 rounded">{formatNumber(countdown.minutes)}</span>
+              <span className="text-gray-700">:</span>
+              <span className="bg-gray-700 text-white text-sm px-1 rounded">{formatNumber(countdown.seconds)}</span>
+            </div>
+          </div>
         </div>
         <div className="relative">
           <button 
@@ -185,7 +253,6 @@ export default function FlashSalePageClient({
             </div>
           ) : (
             <>
-              
               <ProductGrid products={products} />
               {pagination.totalPages > 1 && (
                 <Pagination 

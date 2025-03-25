@@ -111,16 +111,23 @@ export async function getFlashSaleData({
       }
 
       let sortedProducts = [...productsWithFlashSale];
-      if (sort === 'priceAsc') {
-        sortedProducts.sort((a, b) => a.flash_sale!.flash_sale_price - b.flash_sale!.flash_sale_price);
-      } else if (sort === 'priceDesc') {
-        sortedProducts.sort((a, b) => b.flash_sale!.flash_sale_price - a.flash_sale!.flash_sale_price);
-      } else if (sort === 'discount') {
-        sortedProducts.sort((a, b) => b.flash_sale!.flash_sale_per - a.flash_sale!.flash_sale_per);
-      } else {
-        sortedProducts.sort((a, b) => 
-          new Date(a.flash_sale!.end_date).getTime() - new Date(b.flash_sale!.end_date).getTime()
-        );
+
+      switch (sort) {
+        case 'priceAsc':
+          sortedProducts.sort((a, b) => a.flash_sale!.flash_sale_price - b.flash_sale!.flash_sale_price);
+          break;
+        case 'priceDesc':
+          sortedProducts.sort((a, b) => b.flash_sale!.flash_sale_price - a.flash_sale!.flash_sale_price);
+          break;
+        case 'discount':
+          sortedProducts.sort((a, b) => b.flash_sale!.flash_sale_per - a.flash_sale!.flash_sale_per);
+          break;
+        case 'endDate':
+        default:
+          sortedProducts.sort((a, b) => 
+            new Date(a.flash_sale!.end_date).getTime() - new Date(b.flash_sale!.end_date).getTime()
+          );
+          break;
       }
       
       const productWithFlashSale = sortedProducts[0];
@@ -145,6 +152,26 @@ export async function getFlashSaleData({
         productSku: productWithFlashSale.sku,
         isFlashSale: true
       });
+    }
+    
+    switch (sort) {
+      case 'priceAsc':
+        formattedGroups.sort((a, b) => a.price - b.price);
+        break;
+      case 'priceDesc':
+        formattedGroups.sort((a, b) => b.price - a.price);
+        break;
+      case 'discount':
+        formattedGroups.sort((a, b) => (b.discount || 0) - (a.discount || 0));
+        break;
+      case 'endDate':
+      default:
+        formattedGroups.sort((a, b) => {
+          const dateA = a.endDate ? new Date(a.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+          const dateB = b.endDate ? new Date(b.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+          return dateA - dateB;
+        });
+        break;
     }
     
     const totalPages = Math.ceil(totalGroups / pageSize);

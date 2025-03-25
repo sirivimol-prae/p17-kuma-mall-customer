@@ -1,16 +1,15 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { getFlashSaleData } from '@/lib/flashsale';
-import FlashSalePageClient from './components/FlashSalePageClient';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
+import FlashSaleClientWrapper from './FlashSaleClientWrapper';
 
 export const metadata: Metadata = {
   title: 'FLASHSALE! | ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
   description: 'โปรโมชันลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง ของใช้ อาหาร ของเล่น และอุปกรณ์สำหรับสัตว์เลี้ยงคุณภาพดี ลดสูงสุด 50% จำนวนจำกัด',
   keywords: 'flashsale, โปรโมชัน, ลดราคา, สินค้าสัตว์เลี้ยง, อาหารสัตว์, ของใช้สัตว์เลี้ยง',
-  metadataBase: new URL('http://localhost:3000'),
   openGraph: {
     title: 'FLASHSALE! ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
     description: 'โปรโมชันลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง ลดสูงสุด 50% จำนวนจำกัด',
@@ -19,13 +18,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Page(props: any) {
-  const pageValue = 1;
-  const sortValue = 'endDate';
+type SearchParams = {
+  page?: string;
+  sort?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+};
+
+export default async function Page({ searchParams }: { searchParams: SearchParams }) {
+  const pageValue = parseInt(searchParams.page || '1');
+  const sortValue = searchParams.sort || 'endDate';
   const pageSize = 12;
-  const minPriceValue = 0;
-  const maxPriceValue = 999;
-  const categoryParamValue = '';
+  const minPriceValue = parseInt(searchParams.minPrice || '0');
+  const maxPriceValue = parseInt(searchParams.maxPrice || '999');
+  const categoryParamValue = searchParams.category || '';
+
   const { products, pagination } = await getFlashSaleData({
     page: pageValue, 
     pageSize: pageSize, 
@@ -58,9 +66,10 @@ export default async function Page(props: any) {
           priority
         />
       </div>
-      <FlashSalePageClient 
-        initialProducts={products} 
-        initialPagination={pagination}
+
+      <FlashSaleClientWrapper 
+        products={products}
+        pagination={pagination}
         initialSort={sortValue}
       />
     </div>
