@@ -6,6 +6,20 @@ import { ArrowLeft, X, CheckCircle } from 'lucide-react'
 import AccountSidebar from '../component/sidebar';
 import { invoicesData, provinces, districts, subdistricts, postalCodes } from './mockdata';
 
+interface PostalCodes {
+  [district: string]: {
+    [subdistrict: string]: string;
+  };
+}
+
+interface Districts {
+  [province: string]: string[];
+}
+
+interface Subdistricts {
+  [district: string]: string[];
+}
+
 interface Invoice {
   id: number;
   name: string;
@@ -62,9 +76,22 @@ export default function Page() {
     isShippingAddress: false,
   });
 
+  const hasPostalCode = () => {
+    try {
+      if (!selectedDistrict || !newInvoice.subdistrict) return false;
+      
+      const districtPostalCodes = (postalCodes as PostalCodes)[selectedDistrict];
+      if (!districtPostalCodes) return false;
+      
+      return Boolean(districtPostalCodes[newInvoice.subdistrict]);
+    } catch (error) {
+      return false;
+    }
+  };
+
   useEffect(() => {
-    if (selectedProvince && districts[selectedProvince]) {
-      setAvailableDistricts(districts[selectedProvince]);
+    if (selectedProvince && (districts as Districts)[selectedProvince]) {
+      setAvailableDistricts((districts as Districts)[selectedProvince]);
       setSelectedDistrict("");
       setAvailableSubdistricts([]);
     } else {
@@ -73,19 +100,27 @@ export default function Page() {
   }, [selectedProvince]);
 
   useEffect(() => {
-    if (selectedDistrict && subdistricts[selectedDistrict]) {
-      setAvailableSubdistricts(subdistricts[selectedDistrict]);
+    if (selectedDistrict && (subdistricts as Subdistricts)[selectedDistrict]) {
+      setAvailableSubdistricts((subdistricts as Subdistricts)[selectedDistrict]);
     } else {
       setAvailableSubdistricts([]);
     }
   }, [selectedDistrict]);
   
   useEffect(() => {
-    if (selectedDistrict && newInvoice.subdistrict && postalCodes[selectedDistrict]?.[newInvoice.subdistrict]) {
-      setNewInvoice({
-        ...newInvoice,
-        postalCode: postalCodes[selectedDistrict][newInvoice.subdistrict]
-      });
+    if (selectedDistrict && newInvoice.subdistrict) {
+      if (selectedDistrict in postalCodes) {
+        const districtPostalCodes = (postalCodes as PostalCodes)[selectedDistrict];
+        
+        if (districtPostalCodes && newInvoice.subdistrict in districtPostalCodes) {
+          const postalCode = districtPostalCodes[newInvoice.subdistrict];
+          
+          setNewInvoice(prev => ({
+            ...prev,
+            postalCode: postalCode
+          }));
+        }
+      }
     }
   }, [selectedDistrict, newInvoice.subdistrict]);
 
@@ -234,7 +269,15 @@ export default function Page() {
       });
     }
     else if (name === 'subdistrict') {
-      const postalCode = selectedDistrict && postalCodes[selectedDistrict]?.[value] || '';
+      let postalCode = '';
+      
+      if (selectedDistrict && selectedDistrict in postalCodes && value) {
+        const districtCodes = (postalCodes as PostalCodes)[selectedDistrict];
+        if (value in districtCodes) {
+          postalCode = districtCodes[value];
+        }
+      }
+      
       setNewInvoice({
         ...newInvoice,
         subdistrict: value,
@@ -258,11 +301,11 @@ export default function Page() {
       taxId: newInvoice.taxId,
       taxType: taxType,
       address: fullAddress,
+      addressType: newInvoice.addressType,
       subdistrict: newInvoice.subdistrict,
       district: newInvoice.district,
       province: newInvoice.province,
       postalCode: newInvoice.postalCode,
-      addressType: newInvoice.addressType,
       isDefault: newInvoice.isDefault,
       isShippingAddress: newInvoice.isShippingAddress
     };
@@ -309,11 +352,11 @@ export default function Page() {
             taxId: newInvoice.taxId,
             taxType: taxType,
             address: fullAddress,
+            addressType: newInvoice.addressType,
             subdistrict: newInvoice.subdistrict,
             district: newInvoice.district,
             province: newInvoice.province,
             postalCode: newInvoice.postalCode,
-            addressType: newInvoice.addressType,
             isDefault: newInvoice.isDefault,
             isShippingAddress: newInvoice.isShippingAddress
           };
@@ -589,7 +632,6 @@ export default function Page() {
                   />
                 </div>
               )}
-              
               <div className="mb-4">
                 <h3 className="font-medium mb-2 text-[#5F6368]">ข้อมูลผู้ติดต่อ</h3>
                 <div className="mb-4">
@@ -669,8 +711,7 @@ export default function Page() {
                       onChange={handleInputChange}
                       placeholder="รหัสไปรษณีย์ 5 หลัก" 
                       className={inputClassName}
-                      readOnly={newInvoice.subdistrict && postalCodes[selectedDistrict]?.[newInvoice.subdistrict]}
-                      title={newInvoice.subdistrict ? "รหัสไปรษณีย์จะถูกกำหนดอัตโนมัติเมื่อเลือกตำบล/แขวง" : ""}
+                      readOnly={hasPostalCode()}
                     />
                   </div>
                   <div>
