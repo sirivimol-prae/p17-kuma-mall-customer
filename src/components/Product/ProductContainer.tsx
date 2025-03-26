@@ -8,7 +8,8 @@ import { ChevronDown } from 'lucide-react';
 import ProductGrid from './ProductGrid';
 import { ProductGroup, PaginationInfo } from '@/types/product';
 import Pagination from '@/app/product/component/Pagination';
-import ProductSidebar from '@/app/product/component/ProductSidebar';
+import UnifiedSidebar from '@/components/ui/sidebar/UnifiedSidebar';
+import { createQueryString } from '@/lib/shared';
 
 interface ProductContainerProps {
   products: ProductGroup[];
@@ -84,11 +85,7 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
                 height={32}
               />
               <span className="font-medium text-[#B86A4B] text-[24px]">{title}</span>
-              {flashSaleCount > 0 && (
-                <span className="ml-3 bg-[#B86A4B] text-white px-2 py-1 rounded-md text-sm">
-                  Flash Sale: {flashSaleCount} รายการ
-                </span>
-              )}
+
             </div>
             <div className="relative">
               <button 
@@ -126,18 +123,31 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
       <div className="flex flex-col md:flex-row">
         {showFilter && (
           <div className="w-full md:w-1/5 mb-6 md:mb-0">
-            <ProductSidebar />
+            <UnifiedSidebar 
+              type="product"
+              showCategories={false} 
+              showCollections={true}
+              showServices={true}
+              showPriceRange={true}
+            />
           </div>
         )}
 
         <div className={`w-full ${showFilter ? 'md:w-4/5' : 'md:w-full'}`}>
-          <ProductGrid 
-            products={products} 
-            cardSize={cardSize}
-            layout={layout}
-            columns={columns}
-            gap={gap}
-          />
+          {products.length > 0 ? (
+            <ProductGrid 
+              products={products} 
+              cardSize={cardSize}
+              layout={layout}
+              columns={columns}
+              gap={gap}
+            />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-[#5F6368] text-xl">ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา</p>
+            </div>
+          )}
+          
           {showPagination && pagination && pagination.totalPages > 1 && (
             <Pagination 
               currentPage={pagination.page} 
@@ -147,6 +157,7 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
           )}
         </div>
       </div>
+      
       {!showPagination && products.length > 0 && layout === 'carousel' && (
         <div className="text-center mt-4">
           <Link href="/product" className="text-[#D6A985] hover:underline">

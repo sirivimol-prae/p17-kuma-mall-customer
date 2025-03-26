@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { FlashSaleProduct, PaginationInfo } from '@/types/product';
+import { createPagination, formatImageUrl, getSortOptions } from './shared';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +26,7 @@ export async function getFlashSaleData({
     if (categoryParam) {
       categoryIds = categoryParam.split(',').map(id => parseInt(id));
     }
-    
+
     const whereCondition: any = {
       products: {
         some: {
@@ -52,7 +53,7 @@ export async function getFlashSaleData({
         }
       }
     };
-    
+
     if (categoryIds.length > 0) {
       whereCondition.group_categories = {
         some: {
@@ -87,7 +88,7 @@ export async function getFlashSaleData({
       skip,
       take: pageSize
     });
-    
+
     const totalGroups = await prisma.group_product.count({
       where: whereCondition
     });
@@ -132,7 +133,7 @@ export async function getFlashSaleData({
       
       const productWithFlashSale = sortedProducts[0];
       const flashSale = productWithFlashSale.flash_sale!;
-      const imageUrl = group.img_group_product?.img_url_group?.[0] || null;
+      const imageUrl = formatImageUrl(group.img_group_product?.img_url_group?.[0] || null);
       
       formattedGroups.push({
         id: group.id,
@@ -153,7 +154,7 @@ export async function getFlashSaleData({
         isFlashSale: true
       });
     }
-    
+
     switch (sort) {
       case 'priceAsc':
         formattedGroups.sort((a, b) => a.price - b.price);
@@ -173,16 +174,8 @@ export async function getFlashSaleData({
         });
         break;
     }
-    
-    const totalPages = Math.ceil(totalGroups / pageSize);
-    const pagination: PaginationInfo = {
-      page,
-      pageSize,
-      totalItems: totalGroups,
-      totalPages,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
-    };
+
+    const pagination = createPagination(page, pageSize, totalGroups);
 
     return { 
       products: formattedGroups,

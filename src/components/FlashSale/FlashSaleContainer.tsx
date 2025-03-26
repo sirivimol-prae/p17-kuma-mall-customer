@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 import FlashSaleProductGrid from './FlashSaleProductGrid';
 import { FlashSaleProduct, PaginationInfo } from '@/types/product';
-import Sidebar from '@/app/flashsale/components/Sidebar';
+import UnifiedSidebar from '@/components/ui/sidebar/UnifiedSidebar';
 import Pagination from '@/app/product/component/Pagination';
 
 interface FlashSaleContainerProps {
@@ -124,18 +124,31 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
       <div className="flex flex-col md:flex-row">
         {showFilter && (
           <div className="w-full md:w-1/5 mb-6 md:mb-0">
-            <Sidebar />
+            <UnifiedSidebar 
+              type="flashsale"
+              showCategories={true}
+              showCollections={false}
+              showServices={false}
+              showPriceRange={true}
+            />
           </div>
         )}
 
         <div className={`w-full ${showFilter ? 'md:w-4/5' : 'md:w-full'}`}>
-          <FlashSaleProductGrid 
-            products={products} 
-            cardSize={cardSize}
-            layout={layout}
-            columns={columns}
-            gap={gap}
-          />
+          {products.length > 0 ? (
+            <FlashSaleProductGrid 
+              products={products} 
+              cardSize={cardSize}
+              layout={layout}
+              columns={columns}
+              gap={gap}
+            />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-[#5F6368] text-xl">ไม่พบสินค้า Flash Sale ที่ตรงกับเงื่อนไขการค้นหา</p>
+            </div>
+          )}
+          
           {showPagination && pagination && pagination.totalPages > 1 && (
             <Pagination 
               currentPage={pagination.page} 
@@ -145,6 +158,7 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
           )}
         </div>
       </div>
+      
       {!showPagination && products.length > 0 && layout === 'carousel' && (
         <div className="text-center mt-4">
           <Link href="/flashsale" className="text-[#D6A985] hover:underline">
