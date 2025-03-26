@@ -20,7 +20,6 @@ body {
   font-family: 'Minimon';
 }
 
-<<<<<<< Updated upstream
 @layer utilities {
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
@@ -39,7 +38,6 @@ body {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-=======
 .custom-radio {
   display: flex;
   align-items: center;
@@ -97,5 +95,4 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
->>>>>>> Stashed changes
 }
