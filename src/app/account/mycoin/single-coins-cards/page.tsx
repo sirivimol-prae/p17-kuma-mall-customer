@@ -6,7 +6,11 @@ import { ArrowLeft, CreditCard, Calendar, Lock } from 'lucide-react'
 import AccountSidebar from '@/app/account/component/sidebar'
 import TermsModal from '@/app/component/terms-modal'
 
-export default function SingleCoinCard({ params }) {
+interface Params {
+  coinId?: string;
+}
+
+export default function SingleCoinCard({ params }: { params: Params }) {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [selectedRecipient, setSelectedRecipient] = useState('self')
   const [paymentMethod, setPaymentMethod] = useState('')
@@ -18,12 +22,9 @@ export default function SingleCoinCard({ params }) {
     cvv: ''
   })
   
-  // Refs for animation
-  const giftFormRef = useRef(null)
-  const creditFormRef = useRef(null)
-  
-  // Map of coin values to their details
-  const coinData = {
+  const giftFormRef = useRef<HTMLDivElement>(null)
+  const creditFormRef = useRef<HTMLDivElement>(null)
+  const coinData: { [key: string]: { image: string; title: string; price: string; discount: string | null } } = {
     '1000coin': {
       image: '/images/card1.png',
       title: 'บัตรเติม 1000 Coin',
@@ -68,21 +69,43 @@ export default function SingleCoinCard({ params }) {
     }
   }
 
-  // Get coin data based on URL parameter
-  const coin = params?.coinId ? coinData[params.coinId] : coinData['1000coin']
+const coinId = typeof params?.coinId === 'string' ? params.coinId : '1000coin'
+console.log("SingleCoinCard received coinId:", coinId)
 
-  // Handle form submit
-  const handleSubmit = (e) => {
+const coin = coinId in coinData ? coinData[coinId] : coinData['1000coin']
+interface FormSubmitEvent extends React.FormEvent<HTMLFormElement> {}
+
+interface CardDetails {
+    cardNumber: string;
+    cardName: string;
+    expiry: string;
+    cvv: string;
+}
+
+interface SubmitData {
+    coin: {
+        image: string;
+        title: string;
+        price: string;
+        discount: string | null;
+    };
+    selectedRecipient: string;
+    paymentMethod: string;
+    cardDetails?: CardDetails;
+    saveCard?: boolean;
+}
+
+const handleSubmit = (e: FormSubmitEvent): void => {
     e.preventDefault()
-    console.log('ซื้อสินค้า:', {
-      coin,
-      selectedRecipient,
-      paymentMethod,
-      ...(paymentMethod === 'credit' && { cardDetails, saveCard })
-    })
-  }
+    const submitData: SubmitData = {
+        coin,
+        selectedRecipient,
+        paymentMethod,
+        ...(paymentMethod === 'credit' && { cardDetails, saveCard })
+    }
+    console.log('ซื้อสินค้า:', submitData)
+}
 
-  // Animation for gift form
   useEffect(() => {
     if (giftFormRef.current) {
       if (selectedRecipient === 'gift') {
@@ -95,7 +118,6 @@ export default function SingleCoinCard({ params }) {
     }
   }, [selectedRecipient])
 
-  // Animation for credit card form
   useEffect(() => {
     if (creditFormRef.current) {
       if (paymentMethod === 'credit') {
@@ -108,46 +130,58 @@ export default function SingleCoinCard({ params }) {
     }
   }, [paymentMethod])
 
-  // Format card number with spaces
-  const formatCardNumber = (value) => {
+interface CardDetails {
+    cardNumber: string;
+    cardName: string;
+    expiry: string;
+    cvv: string;
+}
+
+const formatCardNumber = (value: string): string => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
     const matches = v.match(/\d{4,16}/g)
     const match = matches && matches[0] || ''
-    const parts = []
+    const parts: string[] = []
     
     for (let i = 0; i < match.length; i += 4) {
-      parts.push(match.substring(i, i + 4))
+        parts.push(match.substring(i, i + 4))
     }
     
     if (parts.length) {
-      return parts.join(' ')
+        return parts.join(' ')
     } else {
-      return value
+        return value
     }
-  }
+}
 
-  // Format expiry date
-  const formatExpiryDate = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
+interface ExpiryDateFormatter {
+    (value: string): string;
+}
+
+const formatExpiryDate: ExpiryDateFormatter = (value) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
     if (v.length >= 2) {
-      return `${v.substring(0, 2)}/${v.substring(2, 4)}`
+        return `${v.substring(0, 2)}/${v.substring(2, 4)}`;
     }
     
-    return value
-  }
+    return value;
+};
 
-  // Handle card number change
-  const handleCardNumberChange = (e) => {
+interface CardNumberChangeEvent extends React.ChangeEvent<HTMLInputElement> {}
+
+const handleCardNumberChange = (e: CardNumberChangeEvent): void => {
     const formatted = formatCardNumber(e.target.value)
     setCardDetails({ ...cardDetails, cardNumber: formatted })
-  }
+}
 
-  // Handle expiry date change
-  const handleExpiryChange = (e) => {
+
+interface ExpiryChangeEvent extends React.ChangeEvent<HTMLInputElement> {}
+
+const handleExpiryChange = (e: ExpiryChangeEvent): void => {
     const formatted = formatExpiryDate(e.target.value)
     setCardDetails({ ...cardDetails, expiry: formatted })
-  }
+}
 
   return (
     <div>
@@ -229,7 +263,7 @@ export default function SingleCoinCard({ params }) {
                         value="self" 
                         checked={selectedRecipient === 'self'}
                         onChange={() => setSelectedRecipient('self')}
-                        className="hidden" // ซ่อน radio จริง
+                        className="hidden" 
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">สำหรับตัวเอง</span>
@@ -249,7 +283,7 @@ export default function SingleCoinCard({ params }) {
                             value="gift"
                             checked={selectedRecipient === 'gift'}
                             onChange={() => setSelectedRecipient('gift')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden" 
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">ส่งเป็นของขวัญ</span>
@@ -314,7 +348,7 @@ export default function SingleCoinCard({ params }) {
                             value="qr"
                             checked={paymentMethod === 'qr'}
                             onChange={() => setPaymentMethod('qr')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden" 
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">QR พร้อมเพย์</span>
@@ -337,7 +371,7 @@ export default function SingleCoinCard({ params }) {
                             value="credit"
                             checked={paymentMethod === 'credit'}
                             onChange={() => setPaymentMethod('credit')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden" 
                             />
                             <span className="radio-mark"></span>
                             <span className="text-gray-700">บัตรเครดิต / บัตรเดบิต</span>
@@ -364,7 +398,7 @@ export default function SingleCoinCard({ params }) {
                                 value={cardDetails.cardNumber}
                                 onChange={handleCardNumberChange}
                                 placeholder="0000 0000 0000 0000"
-                                maxLength="19"
+                                maxLength={19}
                                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#D6A985] focus:border-[#D6A985]"
                             />
                             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -397,7 +431,7 @@ export default function SingleCoinCard({ params }) {
                                 value={cardDetails.expiry}
                                 onChange={handleExpiryChange}
                                 placeholder="MM/YY"
-                                maxLength="5"
+                                maxLength={5}
                                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#D6A985] focus:border-[#D6A985]"
                                 />
                                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -416,7 +450,7 @@ export default function SingleCoinCard({ params }) {
                                 value={cardDetails.cvv}
                                 onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
                                 placeholder="***"
-                                maxLength="3"
+                                maxLength={3}
                                 className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#D6A985] focus:border-[#D6A985]"
                                 />
                                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
@@ -455,7 +489,7 @@ export default function SingleCoinCard({ params }) {
                             value="banking"
                             checked={paymentMethod === 'banking'}
                             onChange={() => setPaymentMethod('banking')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden"
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">ชำระเงินผ่านเคาน์เตอร์</span>
@@ -483,7 +517,7 @@ export default function SingleCoinCard({ params }) {
                             value="mbanking"
                             checked={paymentMethod === 'mbanking'}
                             onChange={() => setPaymentMethod('mbanking')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden" 
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">ชำระเงินผ่าน ATM และ บริการธนาคารทางอินเทอร์เน็ต</span>
@@ -511,7 +545,7 @@ export default function SingleCoinCard({ params }) {
                             value="truemoney"
                             checked={paymentMethod === 'truemoney'}
                             onChange={() => setPaymentMethod('truemoney')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden" 
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">ชำระเงินผ่าน TrueMoney Wallet</span>
@@ -533,7 +567,7 @@ export default function SingleCoinCard({ params }) {
                             value="linepay"
                             checked={paymentMethod === 'linepay'}
                             onChange={() => setPaymentMethod('linepay')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden" 
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">ชำระเงินผ่าน Rabbit LINE Pay</span>
@@ -555,7 +589,7 @@ export default function SingleCoinCard({ params }) {
                             value="alipay"
                             checked={paymentMethod === 'alipay'}
                             onChange={() => setPaymentMethod('alipay')}
-                            className="hidden" // ซ่อน radio จริง
+                            className="hidden" 
                         />
                         <span className="radio-mark"></span>
                         <span className="text-gray-700">ชำระเงินผ่าน Alipay</span>
