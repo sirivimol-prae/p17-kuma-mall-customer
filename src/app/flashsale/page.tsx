@@ -4,7 +4,7 @@ import { getFlashSaleData } from '@/lib/flashsale';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
-import FlashSaleClientWrapper from './FlashSaleClientWrapper';
+import { FlashSaleContainer } from '@/components/FlashSale';
 
 export const metadata: Metadata = {
   title: 'FLASHSALE! | ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
@@ -27,7 +27,7 @@ type SearchParams = {
 };
 
 export default async function Page({ searchParams }: { searchParams: SearchParams }) {
-  // Await searchParams before accessing its properties
+
   const params = await Promise.resolve(searchParams);
   
   const pageValue = parseInt(params.page || '1');
@@ -70,10 +70,13 @@ export default async function Page({ searchParams }: { searchParams: SearchParam
         />
       </div>
 
-      <FlashSaleClientWrapper 
+      <FlashSaleContainer 
         products={products}
         pagination={pagination}
         initialSort={sortValue}
+        showHeader={true}
+        showFilter={true}
+        showPagination={true}
       />
     </div>
   );
