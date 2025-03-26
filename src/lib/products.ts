@@ -10,6 +10,7 @@ export interface GetProductsOptions {
   minPrice: number;
   maxPrice: number;
   collectionParam: string;
+  excludeFlashSale?: boolean;
 }
 
 export async function getProductsData({
@@ -18,7 +19,8 @@ export async function getProductsData({
   sort, 
   minPrice, 
   maxPrice,
-  collectionParam
+  collectionParam,
+  excludeFlashSale = false
 }: GetProductsOptions) {
   try {
     let collectionIds: number[] = [];

@@ -5,13 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
-import FlashSaleProductGrid from './FlashSaleProductGrid';
-import { FlashSaleProduct, PaginationInfo } from '@/types/product';
-import Sidebar from '@/app/flashsale/components/Sidebar';
+import ProductGrid from './ProductGrid';
+import { ProductGroup, PaginationInfo } from '@/types/product';
 import Pagination from '@/app/product/component/Pagination';
+import ProductSidebar from '@/app/product/component/ProductSidebar';
 
-interface FlashSaleContainerProps {
-  products: FlashSaleProduct[];
+interface ProductContainerProps {
+  products: ProductGroup[];
   pagination?: PaginationInfo;
   title?: string;
   showHeader?: boolean;
@@ -23,16 +23,13 @@ interface FlashSaleContainerProps {
   gap?: 'small' | 'medium' | 'large';
   initialSort?: string;
   className?: string;
+  flashSaleCount?: number;
 }
 
-/**
- * คอมโพเนนต์หลักสำหรับส่วนแสดงสินค้า Flash Sale
- * รวมส่วนของ Header, Filter, กริดสินค้า และ Pagination ไว้ด้วยกัน
- */
-const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
+const ProductContainer: React.FC<ProductContainerProps> = ({
   products,
   pagination,
-  title = 'สินค้า Flash Sale',
+  title = 'สินค้าทั้งหมด',
   showHeader = true,
   showFilter = false,
   showPagination = false,
@@ -40,8 +37,9 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
   layout = 'grid',
   columns = 4,
   gap = 'medium',
-  initialSort = 'endDate',
+  initialSort = 'latest',
   className = '',
+  flashSaleCount = 0,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,10 +47,9 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   
   const sortOptions = [
-    { value: 'endDate', label: 'ใกล้หมดเวลา' },
+    { value: 'latest', label: 'สินค้าล่าสุด' },
     { value: 'priceAsc', label: 'ราคาต่ำ - สูง' },
-    { value: 'priceDesc', label: 'ราคาสูง - ต่ำ' },
-    { value: 'discount', label: 'ส่วนลดมากสุด' }
+    { value: 'priceDesc', label: 'ราคาสูง - ต่ำ' }
   ];
 
   const handleSortChange = (sort: string) => {
@@ -87,6 +84,11 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
                 height={32}
               />
               <span className="font-medium text-[#B86A4B] text-[24px]">{title}</span>
+              {flashSaleCount > 0 && (
+                <span className="ml-3 bg-[#B86A4B] text-white px-2 py-1 rounded-md text-sm">
+                  Flash Sale: {flashSaleCount} รายการ
+                </span>
+              )}
             </div>
             <div className="relative">
               <button 
@@ -124,12 +126,12 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
       <div className="flex flex-col md:flex-row">
         {showFilter && (
           <div className="w-full md:w-1/5 mb-6 md:mb-0">
-            <Sidebar />
+            <ProductSidebar />
           </div>
         )}
 
         <div className={`w-full ${showFilter ? 'md:w-4/5' : 'md:w-full'}`}>
-          <FlashSaleProductGrid 
+          <ProductGrid 
             products={products} 
             cardSize={cardSize}
             layout={layout}
@@ -147,8 +149,8 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
       </div>
       {!showPagination && products.length > 0 && layout === 'carousel' && (
         <div className="text-center mt-4">
-          <Link href="/flashsale" className="text-[#D6A985] hover:underline">
-            ดูสินค้า Flash Sale ทั้งหมด &rarr;
+          <Link href="/product" className="text-[#D6A985] hover:underline">
+            ดูสินค้าทั้งหมด &rarr;
           </Link>
         </div>
       )}
@@ -156,4 +158,4 @@ const FlashSaleContainer: React.FC<FlashSaleContainerProps> = ({
   );
 };
 
-export default FlashSaleContainer;
+export default ProductContainer;

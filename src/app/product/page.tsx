@@ -1,11 +1,10 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { getProductsData } from '@/lib/products';
-import ProductPageClient from './component/ProductPageClient';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-
+import { ProductContainer } from '@/components/Product';
 export const metadata: Metadata = {
   title: 'สินค้าทั้งหมด | KUMAま Mall - ของใช้และอาหารสัตว์เลี้ยงคุณภาพดี',
   description: 'เลือกซื้อสินค้าสำหรับสัตว์เลี้ยงคุณภาพดี ทั้งของใช้ อาหาร ของเล่น และอุปกรณ์อื่นๆ สำหรับสุนัขและแมว ส่งฟรีทั่วประเทศเมื่อซื้อครบตามเงื่อนไข',
@@ -19,20 +18,29 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Page(props: any) {
-  const pageValue = 1;
-  const sortValue = 'latest';
+type SearchParams = {
+  page?: string;
+  sort?: string;
+  collection?: string;
+  minPrice?: string;
+  maxPrice?: string;
+};
+
+export default async function Page({ searchParams }: { searchParams: SearchParams }) {
+  const page = parseInt(searchParams.page || '1');
+  const sort = searchParams.sort || 'latest';
   const pageSize = 12;
-  const minPriceValue = 0;
-  const maxPriceValue = 999;
-  const collectionParamValue = '';
+  const minPrice = parseInt(searchParams.minPrice || '0');
+  const maxPrice = parseInt(searchParams.maxPrice || '999');
+  const collectionParam = searchParams.collection || '';
+  
   const { products, pagination, flashSaleCount } = await getProductsData({
-    page: pageValue, 
+    page, 
     pageSize, 
-    sort: sortValue, 
-    minPrice: minPriceValue, 
-    maxPrice: maxPriceValue,
-    collectionParam: collectionParamValue
+    sort, 
+    minPrice, 
+    maxPrice,
+    collectionParam
   });
 
   return (
@@ -59,11 +67,14 @@ export default async function Page(props: any) {
         />
       </div>
 
-      <ProductPageClient 
-        initialProducts={products} 
-        initialPagination={pagination} 
-        initialFlashSaleCount={flashSaleCount}
-        initialSort={sortValue}
+      <ProductContainer 
+        products={products}
+        pagination={pagination}
+        flashSaleCount={flashSaleCount}
+        initialSort={sort}
+        showHeader={true}
+        showFilter={true}
+        showPagination={true}
       />
     </div>
   );
