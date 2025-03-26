@@ -27,12 +27,15 @@ type SearchParams = {
 };
 
 export default async function Page({ searchParams }: { searchParams: SearchParams }) {
-  const pageValue = parseInt(searchParams.page || '1');
-  const sortValue = searchParams.sort || 'endDate';
+  // Await searchParams before accessing its properties
+  const params = await Promise.resolve(searchParams);
+  
+  const pageValue = parseInt(params.page || '1');
+  const sortValue = params.sort || 'endDate';
   const pageSize = 12;
-  const minPriceValue = parseInt(searchParams.minPrice || '0');
-  const maxPriceValue = parseInt(searchParams.maxPrice || '999');
-  const categoryParamValue = searchParams.category || '';
+  const minPriceValue = parseInt(params.minPrice || '0');
+  const maxPriceValue = parseInt(params.maxPrice || '999');
+  const categoryParamValue = params.category || '';
 
   const { products, pagination } = await getFlashSaleData({
     page: pageValue, 
