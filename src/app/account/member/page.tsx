@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react'
 import AccountSidebar from '../component/sidebar';
 import { membershipData, membershipLevels } from './component/mockData';
+import DiscountRibbon from './component/DiscountRibbon';
 
 export default function Page(): React.ReactElement {
   const [currentAmount, setCurrentAmount] = useState(membershipData.currentAmount);
@@ -64,14 +65,20 @@ export default function Page(): React.ReactElement {
   const remainingAmount = calculateRemainingAmount();
   
   const calculatePawPosition = () => {
+    if (!currentMemberData.isLoggedIn) {
+      return 33.33;
+    }
+    
+    const FRIEND_POSITION = 33.33;
+    const CLOSE_FRIEND_POSITION = 66.67;
+    const BEST_FRIEND_POSITION = 100;
+    
     const FRIEND_MAX = 14999;
     const CLOSE_FRIEND_MAX = 34999;
     
-    const FRIEND_POSITION = 100/3; 
-    const CLOSE_FRIEND_POSITION = 2 * 100/3;
-    const BEST_FRIEND_POSITION = 100;
-    
-    if (currentAmount <= FRIEND_MAX) {
+    if (currentAmount === 0) {
+      return FRIEND_POSITION;
+    } else if (currentAmount <= FRIEND_MAX) {
       const progress = currentAmount / FRIEND_MAX;
       return FRIEND_POSITION + progress * (CLOSE_FRIEND_POSITION - FRIEND_POSITION);
     } else if (currentAmount <= CLOSE_FRIEND_MAX) {
@@ -83,6 +90,8 @@ export default function Page(): React.ReactElement {
   };
   
   const pawPosition = calculatePawPosition();
+  
+  const isExactBreakpoint = currentAmount === 0 || currentAmount === 15000 || currentAmount === 35000;
 
   const handleMouseOver = () => {
     setShowTooltip(true);
@@ -230,258 +239,237 @@ export default function Page(): React.ReactElement {
                       }}
                     ></div>
                     
-                    <div 
-                      className="absolute h-full bg-[#B86A4B]" 
-                      style={{ 
-                        left: 'calc(33.33% - 20px)',
-                        width: `calc(${pawPosition}% - (33.33% - 20px))`,
-                        display: currentMemberData.isLoggedIn ? 'block' : 'none'
-                      }}
-                      ></div>
-                      
-                      <div 
-                        className="absolute h-full bg-gray-300" 
-                        style={{ 
-                          left: `calc(${pawPosition}%)`,
-                          right: '0',
-                          display: currentMemberData.isLoggedIn ? 'block' : 'none'
-                        }}
-                      ></div>
-                      
+                    {currentMemberData.isLoggedIn && (
+                      <>
+                        <div 
+                          className="absolute h-full bg-[#B86A4B]" 
+                          style={{ 
+                            left: 'calc(33.33% - 20px)',
+                            width: `calc(${pawPosition}% - (33.33% - 20px))`
+                          }}
+                        ></div>
+                        
+                        <div 
+                          className="absolute h-full bg-gray-300" 
+                          style={{ 
+                            left: `calc(${pawPosition}%)`,
+                            right: '0'
+                          }}
+                        ></div>
+                        
+                        {!isExactBreakpoint && (
+                          <div
+                            className="absolute text-[#B86A4B] font-bold text-center"
+                            style={{ 
+                              left: `calc(${pawPosition}%)`,
+                              top: '-45px',
+                              transform: 'translateX(-50%)',
+                              width: '100px'
+                            }}
+                          >
+                            {currentAmount.toLocaleString()}
+                          </div>
+                        )}
+                        
+                        {!isExactBreakpoint && (
+                          <div 
+                            className="absolute top-[-24px] z-30"
+                            style={{ 
+                              left: `calc(${pawPosition}%)`,
+                              transform: 'translateX(-25px)'
+                            }}
+                          >
+                            <div className="relative group">
+                              <div 
+                                className="w-[50px] h-[50px] bg-[#B86A4B] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#a55c3f] transition-colors duration-200"
+                              >
+                                <img 
+                                  src="/images/foot.png" 
+                                  alt="Current position" 
+                                  className="w-9 h-9" 
+                                />
+                              </div>
+                              
+                              <div 
+                                className="absolute bottom-[-50px] left-1/2 transform -translate-x-1/2 px-3 py-2 bg-white shadow-lg rounded-md border border-gray-200 text-sm text-gray-700 whitespace-nowrap z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300"
+                              >
+                                ยอดซื้อสะสม {currentAmount.toLocaleString()} บาท
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    
+                    {!currentMemberData.isLoggedIn && (
                       <div 
                         className="absolute h-full bg-gray-300" 
                         style={{ 
                           left: 'calc(33.33% - 20px)',
-                          right: '0',
-                          display: !currentMemberData.isLoggedIn ? 'block' : 'none'
+                          right: '0'
                         }}
                       ></div>
-                      
-                      <div
-                        className="absolute text-[#B86A4B] font-bold text-center"
-                        style={{ 
-                          left: `calc(${pawPosition}% - 25px)`,
-                          top: '-45px',
-                          transform: 'translateX(-50%)',
-                          marginLeft: '25px',
-                          display: currentMemberData.isLoggedIn ? 'block' : 'none',
-                          width: '100px'
-                        }}
-                      >
-                        {currentAmount.toLocaleString()}
-                      </div>
-
-                      <div 
-                        className="absolute top-[-24px] z-30"
-                        style={{ 
-                          left: `calc(${pawPosition}% - 25px)`,
-                          display: currentMemberData.isLoggedIn ? 'block' : 'none'
-                        }}
-                      >
-                        <div className="relative group">
-                          <div 
-                            className="w-[50px] h-[50px] bg-[#B86A4B] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#a55c3f] transition-colors duration-200"
-                          >
-                            <img 
-                              src="/images/foot.png" 
-                              alt="Current position" 
-                              className="w-9 h-9" 
-                            />
-                          </div>
-                          
-                          <div 
-                            className="absolute bottom-[-50px] left-1/2 transform -translate-x-1/2 px-3 py-2 bg-white shadow-lg rounded-md border border-gray-200 text-sm text-gray-700 whitespace-nowrap z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300"
-                          >
-                            ยอดซื้อสะสม {currentAmount.toLocaleString()} บาท
-                          </div>
-                        </div>
-                      </div>
-
-                      <style jsx>{`
-                        .tooltip-container:hover .tooltip {
-                          opacity: 1;
-                          visibility: visible;
-                        }
-                      `}</style>
-                    </div>
+                    )}
                   </div>
                 </div>
+              </div>
                 
-                <div className="relative mt-10">
-                  <div className="w-full h-px bg-[#A6A6A6]"></div>
+              <div className="relative mt-10">
+                <div className="w-full h-px bg-[#A6A6A6]"></div>
 
-                  <div className="flex w-full">
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        !currentMemberData.isLoggedIn ? 'text-[#B86A4B]' : 'text-[#D6A985]'
-                      }`}>
-                        สินค้าราคาพิเศษ<br />เฉพาะสำหรับเว็บไซต์เท่านั้น
-                      </p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <div className={`relative px-2 py-1 rounded-md text-[18px] text-center overflow-hidden ${
-                        currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999
-                        ? 'bg-[#B86A4B] text-white' : 
-                        currentMemberData.isLoggedIn && currentAmount > 14999
-                        ? 'bg-[#D6A985] text-white' : 'bg-[#A6A6A6] text-white'
-                      }`}>
-                        <div className="absolute inset-[2px] rounded-[5px] border-2 border-white opacity-100 pointer-events-none"></div>
-                        
-                        <span className="relative z-10">ส่วนลด 3% ทุกคำสั่งซื้อ</span>
-                      </div>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <div className={`relative px-2 py-1 rounded-md text-[18px] text-center overflow-hidden ${
-                        currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999
-                        ? 'bg-[#B86A4B] text-white' : 
-                        currentMemberData.isLoggedIn && currentAmount > 34999
-                        ? 'bg-[#D6A985] text-white' : 'bg-[#A6A6A6] text-white'
-                      }`}>
-                        <div className="absolute inset-[2px] rounded-[5px] border-2 border-white opacity-100 pointer-events-none"></div>
-                        
-                        <span className="relative z-10">ส่วนลด 5% ทุกคำสั่งซื้อ</span>
-                      </div>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <div className={`relative px-2 py-1 rounded-md text-[18px] text-center overflow-hidden ${
-                        currentMemberData.isLoggedIn && currentAmount >= 35000
-                        ? 'bg-[#B86A4B] text-white' : 'bg-[#A6A6A6] text-white'
-                      }`}>
-                        <div className="absolute inset-[2px] rounded-[5px] border-2 border-white opacity-100 pointer-events-none"></div>
-                        
-                        <span className="relative z-10">ส่วนลด 7% ทุกคำสั่งซื้อ</span>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-4 divide-x-0">
+                  <div className="p-4 flex justify-center">
+                    <p className="text-center text-[18px] text-[#D6A985]">
+                      สินค้าราคาพิเศษ<br />เฉพาะสำหรับเว็บไซต์เท่านั้น
+                    </p>
                   </div>
                   
-                  <div className="w-full h-px bg-[#A6A6A6]"></div>
-                  
-                  <div className="flex w-full">
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        !currentMemberData.isLoggedIn ? 'text-[#B86A4B]' : 'text-[#D6A985]'
-                      }`}>-</p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999
-                        ? 'text-[#B86A4B]' : 
-                        currentMemberData.isLoggedIn && currentAmount > 14999
-                        ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
-                      }`}>-</p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999
-                        ? 'text-[#B86A4B]' : 
-                        currentMemberData.isLoggedIn && currentAmount > 34999
-                        ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
-                      }`}>
-                        ช้อปสินค้าราคาเฉพาะ<br />เพื่อนสนิทของคุมะเท่านั้น !
-                      </p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount >= 35000
-                        ? 'text-[#B86A4B]' : 'text-[#A6A6A6]'
-                      }`}>
-                        ช้อปสินค้าราคาเฉพาะ<br />เพื่อนแท้ของคุมะเท่านั้น !
-                      </p>
-                    </div>
+                  <div className="p-4 flex justify-center">
+                    <DiscountRibbon 
+                      isActive={currentMemberData.isLoggedIn && currentAmount > 0} 
+                      discount="ส่วนลด 3% ทุกคำสั่งซื้อ" 
+                      isCurrent={currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999}
+                    />
                   </div>
                   
-                  <div className="w-full h-px bg-[#A6A6A6]"></div>
-                  
-                  <div className="flex w-full">
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        !currentMemberData.isLoggedIn ? 'text-[#B86A4B]' : 'text-[#D6A985]'
-                      }`}>-</p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999
-                        ? 'text-[#B86A4B]' : 
-                        currentMemberData.isLoggedIn && currentAmount > 14999
-                        ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
-                      }`}>-</p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999
-                        ? 'text-[#B86A4B]' : 
-                        currentMemberData.isLoggedIn && currentAmount > 34999
-                        ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
-                      }`}>-</p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount >= 35000
-                        ? 'text-[#B86A4B]' : 'text-[#A6A6A6]'
-                      }`}>
-                        Birthday Best Friend Gift<br />ของขวัญวันเกิดสุดพิเศษ
-                      </p>
-                    </div>
+                  <div className="p-4 flex justify-center">
+                    <DiscountRibbon 
+                      isActive={currentMemberData.isLoggedIn && currentAmount >= 15000} 
+                      discount="ส่วนลด 5% ทุกคำสั่งซื้อ" 
+                      isCurrent={currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999}
+                    />
                   </div>
                   
-                  <div className="w-full h-px bg-[#A6A6A6]"></div>
-                  
-                  <div className="flex w-full">
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        !currentMemberData.isLoggedIn ? 'text-[#B86A4B]' : 'text-[#D6A985]'
-                      }`}>
-                        สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
-                      </p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999
-                        ? 'text-[#B86A4B]' : 
-                        currentMemberData.isLoggedIn && currentAmount > 14999
-                        ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
-                      }`}>
-                        สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
-                      </p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999
-                        ? 'text-[#B86A4B]' : 
-                        currentMemberData.isLoggedIn && currentAmount > 34999
-                        ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
-                      }`}>
-                        สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
-                      </p>
-                    </div>
-                    
-                    <div className="w-1/4 py-4 flex justify-center items-center">
-                      <p className={`text-center text-[18px] ${
-                        currentMemberData.isLoggedIn && currentAmount >= 35000
-                        ? 'text-[#B86A4B]' : 'text-[#A6A6A6]'
-                      }`}>
-                        สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
-                      </p>
-                    </div>
+                  <div className="p-4 flex justify-center">
+                    <DiscountRibbon 
+                      isActive={currentMemberData.isLoggedIn && currentAmount >= 35000} 
+                      discount="ส่วนลด 7% ทุกคำสั่งซื้อ" 
+                      isCurrent={currentMemberData.isLoggedIn && currentAmount >= 35000}
+                    />
                   </div>
-                  
-                  <div className="w-full h-px bg-[#A6A6A6]"></div>
                 </div>
+                  
+                <div className="w-full h-px bg-[#A6A6A6]"></div>
+                  
+                <div className="grid grid-cols-4 divide-x-0">
+                  <div className="p-4 flex justify-center">
+                    <p className="text-center text-[18px] text-[#D6A985]">-</p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999
+                      ? 'text-[#B86A4B]' : 
+                      currentMemberData.isLoggedIn && currentAmount > 14999
+                      ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
+                    }`}>-</p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999
+                      ? 'text-[#B86A4B]' : 
+                      currentMemberData.isLoggedIn && currentAmount > 34999
+                      ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
+                    }`}>
+                      ช้อปสินค้าราคาเฉพาะ<br />เพื่อนสนิทของคุมะเท่านั้น !
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount >= 35000
+                      ? 'text-[#B86A4B]' : 'text-[#A6A6A6]'
+                    }`}>
+                      ช้อปสินค้าราคาเฉพาะ<br />เพื่อนแท้ของคุมะเท่านั้น !
+                    </p>
+                  </div>
+                </div>
+                  
+                <div className="w-full h-px bg-[#A6A6A6]"></div>
+                  
+                <div className="grid grid-cols-4 divide-x-0">
+                  <div className="p-4 flex justify-center">
+                    <p className="text-center text-[18px] text-[#D6A985]">-</p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999
+                      ? 'text-[#B86A4B]' : 
+                      currentMemberData.isLoggedIn && currentAmount > 14999
+                      ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
+                    }`}>-</p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999
+                      ? 'text-[#B86A4B]' : 
+                      currentMemberData.isLoggedIn && currentAmount > 34999
+                      ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
+                    }`}>-</p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount >= 35000
+                      ? 'text-[#B86A4B]' : 'text-[#A6A6A6]'
+                    }`}>
+                      Birthday Best Friend Gift<br />ของขวัญวันเกิดสุดพิเศษ
+                    </p>
+                  </div>
+                </div>
+                  
+                <div className="w-full h-px bg-[#A6A6A6]"></div>
+                  
+                <div className="grid grid-cols-4 divide-x-0">
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      !currentMemberData.isLoggedIn ? 'text-[#B86A4B]' : 'text-[#D6A985]'
+                    }`}>
+                      สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount > 0 && currentAmount <= 14999
+                      ? 'text-[#B86A4B]' : 
+                      currentMemberData.isLoggedIn && currentAmount > 14999
+                      ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
+                    }`}>
+                      สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount >= 15000 && currentAmount <= 34999
+                      ? 'text-[#B86A4B]' : 
+                      currentMemberData.isLoggedIn && currentAmount > 34999
+                      ? 'text-[#D6A985]' : 'text-[#A6A6A6]'
+                    }`}>
+                      สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 flex justify-center">
+                    <p className={`text-center text-[18px] ${
+                      currentMemberData.isLoggedIn && currentAmount >= 35000
+                      ? 'text-[#B86A4B]' : 'text-[#A6A6A6]'
+                    }`}>
+                      สิทธิประโยชน์อื่นๆ<br />อีกมากมายรอให้ลุ้น !
+                    </p>
+                  </div>
+                </div>
+                  
+                <div className="w-full h-px bg-[#A6A6A6]"></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
