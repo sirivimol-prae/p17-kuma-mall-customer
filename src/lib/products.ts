@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { ProductGroup, PaginationInfo } from '@/types/product';
+import { createPagination, formatImageUrl, getSortOptions } from './shared';
 
 const prisma = new PrismaClient();
 
@@ -10,6 +11,7 @@ export interface GetProductsOptions {
   minPrice: number;
   maxPrice: number;
   collectionParam: string;
+  excludeFlashSale?: boolean;
 }
 
 export async function getProductsData({
@@ -18,14 +20,15 @@ export async function getProductsData({
   sort, 
   minPrice, 
   maxPrice,
-  collectionParam
+  collectionParam,
+  excludeFlashSale = false
 }: GetProductsOptions) {
   try {
     let collectionIds: number[] = [];
     if (collectionParam) {
       collectionIds = collectionParam.split(',').map(id => parseInt(id));
     }
-    
+
     let whereCondition: any = {
       products: {
         some: {
@@ -38,7 +41,7 @@ export async function getProductsData({
         }
       }
     };
-    
+
     if (collectionIds.length > 0) {
       whereCondition.group_collections = {
         some: {
@@ -48,9 +51,8 @@ export async function getProductsData({
         }
       };
     }
-    
-    let orderBy: any = {};
 
+    let orderBy: any = {};
     switch (sort) {
       case 'priceAsc':
         orderBy = { id: 'asc' };
@@ -97,14 +99,16 @@ export async function getProductsData({
       skip,
       take: pageSize
     });
-    
+
     const totalGroups = await prisma.group_product.count({
       where: whereCondition
     });
 
-    const formattedGroups: ProductGroup[] = groupProducts.map(group => {
+    const formattedGroups: ProductGroup[] = [];
+    
+    for (const group of groupProducts) {
       const productsInPriceRange = group.products.map(p => p.product);
-      const prices = productsInPriceRange.map(p => p!.price_origin);
+      const prices = productsInPriceRange.map(p => p.price_origin);
       const minGroupPrice = prices.length > 0 ? Math.min(...prices) : 0;
       const activeFlashSale = productsInPriceRange.find(p => 
         p.flash_sale && 
@@ -112,8 +116,14 @@ export async function getProductsData({
         p.flash_sale.quantity > 0 && 
         new Date(p.flash_sale.end_date) > new Date()
       );
-      const hasDiscount = productsInPriceRange.some(p => p!.make_price !== null && p!.make_price < p!.price_origin);
-      const imageUrl = group.img_group_product?.img_url_group?.[0] || null;
+
+      if (excludeFlashSale && activeFlashSale) {
+        continue;
+      }
+      
+      const hasDiscount = productsInPriceRange.some(p => p.make_price !== null && p.make_price < p.price_origin);
+      const imageUrl = formatImageUrl(group.img_group_product?.img_url_group?.[0] || null);
+      
       const productData: ProductGroup = {
         id: group.id,
         uuid: group.uuid,
@@ -130,7 +140,7 @@ export async function getProductsData({
       };
 
       if (activeFlashSale && activeFlashSale.flash_sale) {
-        return {
+        formattedGroups.push({
           ...productData,
           isFlashSale: true,
           flashSalePrice: activeFlashSale.flash_sale.flash_sale_price,
@@ -139,23 +149,15 @@ export async function getProductsData({
           quantity: activeFlashSale.flash_sale.quantity,
           price: activeFlashSale.flash_sale.flash_sale_price,
           originalPrice: activeFlashSale.flash_sale.price_origin
-        };
+        });
+      } else {
+        formattedGroups.push(productData);
       }
-      
-      return productData;
-    });
+    }
 
     const flashSaleCount = formattedGroups.filter(product => product.isFlashSale).length;
 
-    const totalPages = Math.ceil(totalGroups / pageSize);
-    const pagination: PaginationInfo = {
-      page,
-      pageSize,
-      totalItems: totalGroups,
-      totalPages,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
-    };
+    const pagination = createPagination(page, pageSize, totalGroups);
 
     return { 
       products: formattedGroups,

@@ -4,12 +4,13 @@ import { getFlashSaleData } from '@/lib/flashsale';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
-import FlashSaleClientWrapper from './FlashSaleClientWrapper';
+import { FlashSaleContainer } from '@/components/FlashSale';
 
 export const metadata: Metadata = {
   title: 'FLASHSALE! | ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
   description: 'โปรโมชันลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง ของใช้ อาหาร ของเล่น และอุปกรณ์สำหรับสัตว์เลี้ยงคุณภาพดี ลดสูงสุด 50% จำนวนจำกัด',
   keywords: 'flashsale, โปรโมชัน, ลดราคา, สินค้าสัตว์เลี้ยง, อาหารสัตว์, ของใช้สัตว์เลี้ยง',
+  metadataBase: new URL('https://kumamall.com'),
   openGraph: {
     title: 'FLASHSALE! ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
     description: 'โปรโมชันลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง ลดสูงสุด 50% จำนวนจำกัด',
@@ -27,16 +28,13 @@ type SearchParams = {
 };
 
 export default async function Page({ searchParams }: { searchParams: SearchParams }) {
-  // Await searchParams before accessing its properties
   const params = await Promise.resolve(searchParams);
-  
   const pageValue = parseInt(params.page || '1');
   const sortValue = params.sort || 'endDate';
   const pageSize = 12;
   const minPriceValue = parseInt(params.minPrice || '0');
   const maxPriceValue = parseInt(params.maxPrice || '999');
   const categoryParamValue = params.category || '';
-
   const { products, pagination } = await getFlashSaleData({
     page: pageValue, 
     pageSize: pageSize, 
@@ -47,7 +45,7 @@ export default async function Page({ searchParams }: { searchParams: SearchParam
   });
 
   return (
-    <div>
+    <div className="min-h-screen">
       <div className="container mx-auto py-3">
         <div className="flex items-center text-gray-600">
           <Link href="/" className="flex items-center gap-2 hover:text-[#B86A4B]">
@@ -70,10 +68,13 @@ export default async function Page({ searchParams }: { searchParams: SearchParam
         />
       </div>
 
-      <FlashSaleClientWrapper 
+      <FlashSaleContainer 
         products={products}
         pagination={pagination}
         initialSort={sortValue}
+        showHeader={true}
+        showFilter={true}
+        showPagination={true}
       />
     </div>
   );

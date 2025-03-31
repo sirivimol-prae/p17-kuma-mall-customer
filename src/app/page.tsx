@@ -1,15 +1,17 @@
 import React from 'react';
 import BannerSlider from '@/components/BannerSlider';
 import HomepageFlashSale from '@/components/HomepageFlashSale';
+import HomepageProducts from '@/components/Product/HomepageProducts';
 import { getFlashSaleData } from '@/lib/flashsale';
+import { getProductsData } from '@/lib/products';
 
 export default async function Page() {
   const bannerImages = [
     { src: '/images/slider1.png', alt: 'ชามอาหารทรงสูง' },
     { src: '/images/slider2.png', alt: 'ชามอาหารสีพาสเทล' },
   ];
-  
-  const { products } = await getFlashSaleData({
+
+  const { products: flashSaleProducts } = await getFlashSaleData({
     page: 1,
     pageSize: 10,
     sort: 'endDate',
@@ -17,16 +19,25 @@ export default async function Page() {
     maxPrice: 999,
     categoryParam: ''
   });
+
+  const { products: regularProducts } = await getProductsData({
+    page: 1,
+    pageSize: 10,
+    sort: 'latest',
+    minPrice: 0,
+    maxPrice: 999,
+    collectionParam: '',
+    excludeFlashSale: true
+  });
   
   return (
     <main>
-      
       <BannerSlider 
         images={bannerImages}
         autoSlideInterval={5000}
       />
-      <HomepageFlashSale products={products} />
-
+      <HomepageFlashSale products={flashSaleProducts} />
+      <HomepageProducts products={regularProducts} />
     </main>
   );
 }
