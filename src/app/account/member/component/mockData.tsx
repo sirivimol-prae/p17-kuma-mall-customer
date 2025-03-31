@@ -25,7 +25,7 @@ export interface MembershipLevel {
 export const membershipData: MembershipData = {
   currentStatus: 'KUMAま FRIEND',
   nextStatus: 'KUMAま CLOSE FRIEND',
-  currentAmount: 8000,
+  currentAmount: 5000,
   targetAmount: 15000,
   expiryDate: '22/07/2025',
   profileImage: '/images/profile.png',

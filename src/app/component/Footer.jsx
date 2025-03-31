@@ -76,7 +76,7 @@ const Footer = () => {
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">การสมัครสมาชิก</Link></li>
               <li><Link href="/account/member" className="text-[16px] hover:underline leading-tight">สิทธิประโยชน์สมาชิก</Link></li>
               <li><Link href="/account/mycoin" className="text-[16px] hover:underline leading-tight">KUMA ま Coin ของฉัน</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">คูปองส่วนลดของฉัน</Link></li>
+              <li><Link href="/account/coupon" className="text-[16px] hover:underline leading-tight">คูปองส่วนลดของฉัน</Link></li>
             </ul>
           </div>
           

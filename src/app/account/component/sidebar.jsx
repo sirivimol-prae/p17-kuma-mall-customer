@@ -52,7 +52,7 @@ const SidebarAccount = () => {
             </a>
           </div>
           <div className="py-2">
-            <a href="#" className="text-gray-600 hover:text-[#D6A985] flex items-center">
+            <a href="/account/coupon" className="text-gray-600 hover:text-[#D6A985] flex items-center">
               <span className="text-[#D6A985] mr-1">›</span> คูปองส่วนลดของฉัน
             </a>
           </div>
