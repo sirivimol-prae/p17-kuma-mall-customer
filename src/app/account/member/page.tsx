@@ -69,29 +69,47 @@ export default function Page(): React.ReactElement {
       return 33.33;
     }
     
+    const MALL_POSITION = 0;
     const FRIEND_POSITION = 33.33;
     const CLOSE_FRIEND_POSITION = 66.67;
     const BEST_FRIEND_POSITION = 100;
+    
+    const CIRCLE_WIDTH_PERCENT = 10; 
+    
+    const FRIEND_RIGHT_EDGE = FRIEND_POSITION + (CIRCLE_WIDTH_PERCENT / 2);
+    
+    const BEST_FRIEND_LEFT_EDGE = BEST_FRIEND_POSITION - (CIRCLE_WIDTH_PERCENT / 2);
+    const BEST_FRIEND_RIGHT_EDGE = BEST_FRIEND_POSITION + (CIRCLE_WIDTH_PERCENT / 2);
+    
+    const MOVABLE_RANGE = BEST_FRIEND_LEFT_EDGE - FRIEND_RIGHT_EDGE;
     
     const FRIEND_MAX = 14999;
     const CLOSE_FRIEND_MAX = 34999;
     
     if (currentAmount === 0) {
-      return FRIEND_POSITION;
-    } else if (currentAmount <= FRIEND_MAX) {
+      return FRIEND_RIGHT_EDGE;
+    } 
+    else if (currentAmount <= FRIEND_MAX) {
+      const rangeToCloseLeft = CLOSE_FRIEND_POSITION - (CIRCLE_WIDTH_PERCENT / 2) - FRIEND_RIGHT_EDGE;
       const progress = currentAmount / FRIEND_MAX;
-      return FRIEND_POSITION + progress * (CLOSE_FRIEND_POSITION - FRIEND_POSITION);
-    } else if (currentAmount <= CLOSE_FRIEND_MAX) {
+      return FRIEND_RIGHT_EDGE + progress * rangeToCloseLeft;
+    } 
+    else if (currentAmount < 35000) {
+      const closeRightEdge = CLOSE_FRIEND_POSITION + (CIRCLE_WIDTH_PERCENT / 2);
       const progress = (currentAmount - FRIEND_MAX) / (CLOSE_FRIEND_MAX - FRIEND_MAX);
-      return CLOSE_FRIEND_POSITION + progress * (BEST_FRIEND_POSITION - CLOSE_FRIEND_POSITION);
-    } else {
-      return BEST_FRIEND_POSITION;
+      return closeRightEdge + progress * (BEST_FRIEND_LEFT_EDGE - closeRightEdge);
+    } 
+    else if (currentAmount === 35000) {
+      return BEST_FRIEND_RIGHT_EDGE;
+    }
+    else {
+      return BEST_FRIEND_RIGHT_EDGE;
     }
   };
   
   const pawPosition = calculatePawPosition();
   
-  const isExactBreakpoint = currentAmount === 0 || currentAmount === 15000 || currentAmount === 35000;
+  const isExactBreakpoint = false;
 
   const handleMouseOver = () => {
     setShowTooltip(true);
@@ -177,9 +195,9 @@ export default function Page(): React.ReactElement {
             <div className="mt-14">
               <h3 className="text-[28px] font-bold text-[#5F6368] mb-2">ระดับสมาชิกของฉัน</h3>
               
-              <div className="relative mt-10 mb-20">
+              <div className="relative mt-10 mb-5">
                 <div ref={timelineRef} className="relative">
-                  <div className="flex justify-between relative z-20">
+                  <div className="grid grid-cols-4 relative z-20">
                     {levels.map((level, index) => {
                       const activeIndex = levels.findIndex(l => l.isActive);
                       
@@ -231,84 +249,62 @@ export default function Page(): React.ReactElement {
                     })}
                   </div>
                   
-                  <div className="absolute top-[60px] left-[60px] right-[60px] h-[12px] z-10">
-                    <div 
-                      className="absolute left-0 h-full bg-[#B86A4B]" 
-                      style={{ 
-                        width: 'calc(33.33% - 20px)'
-                      }}
-                    ></div>
+                  <div className="absolute top-[60px] h-[12px] z-10" style={{ left: '125px', right: '125px' }}>
+                    <div className="absolute h-full bg-gray-300 left-0 right-0"></div>
                     
-                    {currentMemberData.isLoggedIn && (
-                      <>
-                        <div 
-                          className="absolute h-full bg-[#B86A4B]" 
-                          style={{ 
-                            left: 'calc(33.33% - 20px)',
-                            width: `calc(${pawPosition}% - (33.33% - 20px))`
-                          }}
-                        ></div>
-                        
-                        <div 
-                          className="absolute h-full bg-gray-300" 
-                          style={{ 
-                            left: `calc(${pawPosition}%)`,
-                            right: '0'
-                          }}
-                        ></div>
-                        
-                        {!isExactBreakpoint && (
-                          <div
-                            className="absolute text-[#B86A4B] font-bold text-center"
-                            style={{ 
-                              left: `calc(${pawPosition}%)`,
-                              top: '-45px',
-                              transform: 'translateX(-50%)',
-                              width: '100px'
-                            }}
-                          >
-                            {currentAmount.toLocaleString()}
-                          </div>
-                        )}
-                        
-                        {!isExactBreakpoint && (
-                          <div 
-                            className="absolute top-[-24px] z-30"
-                            style={{ 
-                              left: `calc(${pawPosition}%)`,
-                              transform: 'translateX(-25px)'
-                            }}
-                          >
-                            <div className="relative group">
-                              <div 
-                                className="w-[50px] h-[50px] bg-[#B86A4B] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#a55c3f] transition-colors duration-200"
-                              >
-                                <img 
-                                  src="/images/foot.png" 
-                                  alt="Current position" 
-                                  className="w-9 h-9" 
-                                />
-                              </div>
-                              
-                              <div 
-                                className="absolute bottom-[-50px] left-1/2 transform -translate-x-1/2 px-3 py-2 bg-white shadow-lg rounded-md border border-gray-200 text-sm text-gray-700 whitespace-nowrap z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300"
-                              >
-                                ยอดซื้อสะสม {currentAmount.toLocaleString()} บาท
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
+                    <div className="absolute h-full bg-[#B86A4B] left-0" style={{ width: '33.33%' }}></div>
                     
-                    {!currentMemberData.isLoggedIn && (
+                    {currentMemberData.isLoggedIn && currentAmount > 0 && (
                       <div 
-                        className="absolute h-full bg-gray-300" 
+                        className="absolute h-full bg-[#B86A4B]" 
                         style={{ 
-                          left: 'calc(33.33% - 20px)',
-                          right: '0'
+                          left: '33.33%',
+                          width: `${pawPosition - 33.33}%`,
+                          zIndex: 15
                         }}
                       ></div>
+                    )}
+                    
+                    {currentMemberData.isLoggedIn && !isExactBreakpoint && (
+                      <>
+                        <div
+                          className="absolute text-[#B86A4B] font-bold text-center"
+                          style={{ 
+                            left: `${pawPosition}%`,
+                            top: '-45px',
+                            transform: 'translateX(-50%)',
+                            width: '100px'
+                          }}
+                        >
+                          {currentAmount.toLocaleString()}
+                        </div>
+                        
+                        <div 
+                          className="absolute top-[-24px] z-30"
+                          style={{ 
+                            left: `${pawPosition}%`,
+                            transform: 'translateX(-25px)'
+                          }}
+                        >
+                          <div className="relative group">
+                            <div 
+                              className="w-[50px] h-[50px] bg-[#B86A4B] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#a55c3f] transition-colors duration-200"
+                            >
+                              <img 
+                                src="/images/foot.png" 
+                                alt="Current position" 
+                                className="w-9 h-9" 
+                              />
+                            </div>
+                            
+                            <div 
+                              className="absolute bottom-[-50px] left-1/2 transform -translate-x-1/2 px-3 py-2 bg-white shadow-lg rounded-md border border-gray-200 text-sm text-gray-700 whitespace-nowrap z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300"
+                            >
+                              ยอดซื้อสะสม {currentAmount.toLocaleString()} บาท
+                            </div>
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
@@ -317,7 +313,7 @@ export default function Page(): React.ReactElement {
               <div className="relative mt-10">
                 <div className="w-full h-px bg-[#A6A6A6]"></div>
 
-                <div className="grid grid-cols-4 divide-x-0">
+                <div className="grid grid-cols-4">
                   <div className="p-4 flex justify-center">
                     <p className="text-center text-[18px] text-[#D6A985]">
                       สินค้าราคาพิเศษ<br />เฉพาะสำหรับเว็บไซต์เท่านั้น
@@ -351,7 +347,7 @@ export default function Page(): React.ReactElement {
                   
                 <div className="w-full h-px bg-[#A6A6A6]"></div>
                   
-                <div className="grid grid-cols-4 divide-x-0">
+                <div className="grid grid-cols-4">
                   <div className="p-4 flex justify-center">
                     <p className="text-center text-[18px] text-[#D6A985]">-</p>
                   </div>
@@ -388,7 +384,7 @@ export default function Page(): React.ReactElement {
                   
                 <div className="w-full h-px bg-[#A6A6A6]"></div>
                   
-                <div className="grid grid-cols-4 divide-x-0">
+                <div className="grid grid-cols-4">
                   <div className="p-4 flex justify-center">
                     <p className="text-center text-[18px] text-[#D6A985]">-</p>
                   </div>
@@ -423,7 +419,7 @@ export default function Page(): React.ReactElement {
                   
                 <div className="w-full h-px bg-[#A6A6A6]"></div>
                   
-                <div className="grid grid-cols-4 divide-x-0">
+                <div className="grid grid-cols-4">
                   <div className="p-4 flex justify-center">
                     <p className={`text-center text-[18px] ${
                       !currentMemberData.isLoggedIn ? 'text-[#B86A4B]' : 'text-[#D6A985]'
