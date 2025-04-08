@@ -1,9 +1,9 @@
 import React from 'react'
-import Sidebar from './component/sidebar'
+import Sidebar from '../new_arrival/component/sidebar'
 import { ArrowLeft, ChevronDown, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link';
 import Image from 'next/image';
-import { mockProducts } from './component/mockProducts';
+import { mockProducts } from '../categories/component/mockProducts'
 
 const page = () => {
   return (
@@ -14,7 +14,7 @@ const page = () => {
             <span>หน้าแรก</span>
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-[#D6A985]">หมวดหมู่สินค้า</span>
+          <span className="text-[#D6A985]">โซนสินค้าลดราคา</span>
         </div>
         
         <div className="mb-2">
@@ -40,7 +40,7 @@ const page = () => {
                 className="w-full h-full"
               />
             </div>
-            <span className="text-[#B86A4B] font-bold text-[28px]">หมวดหมู่สินค้า</span>
+            <span className="text-[#B86A4B] font-bold text-[28px]">โซนสินค้าลดราคา</span>
             <div className="ml-auto">
               <span className="text-[#D6A985] text-[18px] flex items-center gap-1">
                 เรียงลำดับ <ChevronDown />
