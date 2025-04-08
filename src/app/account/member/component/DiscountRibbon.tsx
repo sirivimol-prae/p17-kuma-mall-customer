@@ -8,7 +8,8 @@ interface DiscountRibbonProps {
 
 const DiscountRibbon: React.FC<DiscountRibbonProps> = ({ isActive, discount, isCurrent }) => {
   const bgColor = isCurrent ? '#B86A4B' : isActive ? '#D6A985' : '#A6A6A6';
-  
+
+  // SVG is needed because it has to change color depending on the level
   return (
     <div className="relative w-full flex justify-center items-center py-2">
       <div className="relative inline-block">
