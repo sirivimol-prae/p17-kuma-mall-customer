@@ -76,17 +76,17 @@ const Footer = () => {
               <li><Link href="#" className="text-[16px] hover:underline leading-tight">การสมัครสมาชิก</Link></li>
               <li><Link href="/account/member" className="text-[16px] hover:underline leading-tight">สิทธิประโยชน์สมาชิก</Link></li>
               <li><Link href="/account/mycoin" className="text-[16px] hover:underline leading-tight">KUMA ま Coin ของฉัน</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">คูปองส่วนลดของฉัน</Link></li>
+              <li><Link href="/account/coupon" className="text-[16px] hover:underline leading-tight">คูปองส่วนลดของฉัน</Link></li>
             </ul>
           </div>
           
           <div className="space-y-3">
             <h3 className="text-[20px] font-medium">โปรโมชั่นสินค้า</h3>
             <ul className="space-y-1">
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">สินค้าเข้าใหม่</Link></li>
+              <li><Link href="/new_arrival" className="text-[16px] hover:underline leading-tight">สินค้าเข้าใหม่</Link></li>
               <li><Link href="/flashsale" className="text-[16px] hover:underline leading-tight">Flash Sale!</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">โบนัสสินค้าลดราคา</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">กล่องสุ่ม/Box Set</Link></li>
+              <li><Link href="/special_discount" className="text-[16px] hover:underline leading-tight">โบนัสสินค้าลดราคา</Link></li>
+              <li><Link href="/Mystery_Box" className="text-[16px] hover:underline leading-tight">กล่องสุ่ม/Box Set</Link></li>
             </ul>
           </div>
         </div>

@@ -17,7 +17,7 @@ export default function page() {
   
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('บันทึกข้อมูล:', userInfo);
   };

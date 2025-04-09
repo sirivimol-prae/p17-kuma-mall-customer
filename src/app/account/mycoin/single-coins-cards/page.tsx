@@ -2,19 +2,25 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, CreditCard, Calendar, Lock } from 'lucide-react'
 import AccountSidebar from '@/app/account/component/sidebar'
 import TermsModal from '@/app/component/terms-modal'
 
-interface Params {
-  coinId?: string;
+interface PageProps {
+  params: {
+    coinId: string;
+  };
 }
 
-export default function SingleCoinCard({ params }: { params: Params }) {
+export default function SingleCoinCard({ params }: PageProps) {
+  const router = useRouter()
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   const [selectedRecipient, setSelectedRecipient] = useState('self')
   const [paymentMethod, setPaymentMethod] = useState('')
   const [saveCard, setSaveCard] = useState(false)
+  const [recipientEmail, setRecipientEmail] = useState('')
+  const [giftMessage, setGiftMessage] = useState('')
   const [cardDetails, setCardDetails] = useState({
     cardNumber: '',
     cardName: '',
@@ -69,20 +75,21 @@ export default function SingleCoinCard({ params }: { params: Params }) {
     }
   }
 
-const coinId = typeof params?.coinId === 'string' ? params.coinId : '1000coin'
-console.log("SingleCoinCard received coinId:", coinId)
+  const coinId = params?.coinId || '1000coin'
+  console.log("SingleCoinCard received coinId:", coinId)
 
-const coin = coinId in coinData ? coinData[coinId] : coinData['1000coin']
-interface FormSubmitEvent extends React.FormEvent<HTMLFormElement> {}
+  const coin = coinId in coinData ? coinData[coinId] : coinData['1000coin']
+  
+  interface FormSubmitEvent extends React.FormEvent<HTMLFormElement> {}
 
-interface CardDetails {
+  interface CardDetails {
     cardNumber: string;
     cardName: string;
     expiry: string;
     cvv: string;
-}
+  }
 
-interface SubmitData {
+  interface SubmitData {
     coin: {
         image: string;
         title: string;
@@ -91,20 +98,29 @@ interface SubmitData {
     };
     selectedRecipient: string;
     paymentMethod: string;
+    recipientEmail?: string;
+    giftMessage?: string;
     cardDetails?: CardDetails;
     saveCard?: boolean;
-}
+  }
 
-const handleSubmit = (e: FormSubmitEvent): void => {
+  const handleSubmit = (e: FormSubmitEvent): void => {
     e.preventDefault()
     const submitData: SubmitData = {
         coin,
         selectedRecipient,
         paymentMethod,
+        ...(selectedRecipient === 'gift' && { recipientEmail, giftMessage }),
         ...(paymentMethod === 'credit' && { cardDetails, saveCard })
     }
     console.log('ซื้อสินค้า:', submitData)
-}
+    
+    if (selectedRecipient === 'self') {
+      router.push(`/account/mycoin/success?coinId=${coinId}&price=${coin.price}&title=${encodeURIComponent(coin.title)}&image=${encodeURIComponent(coin.image)}`)
+    } else {
+      router.push(`/account/mycoin/success-gift?email=${encodeURIComponent(recipientEmail)}`)
+    }
+  }
 
   useEffect(() => {
     if (giftFormRef.current) {
@@ -130,14 +146,7 @@ const handleSubmit = (e: FormSubmitEvent): void => {
     }
   }, [paymentMethod])
 
-interface CardDetails {
-    cardNumber: string;
-    cardName: string;
-    expiry: string;
-    cvv: string;
-}
-
-const formatCardNumber = (value: string): string => {
+  const formatCardNumber = (value: string): string => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
     const matches = v.match(/\d{4,16}/g)
     const match = matches && matches[0] || ''
@@ -152,13 +161,9 @@ const formatCardNumber = (value: string): string => {
     } else {
         return value
     }
-}
+  }
 
-interface ExpiryDateFormatter {
-    (value: string): string;
-}
-
-const formatExpiryDate: ExpiryDateFormatter = (value) => {
+  const formatExpiryDate = (value: string): string => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     
     if (v.length >= 2) {
@@ -166,22 +171,17 @@ const formatExpiryDate: ExpiryDateFormatter = (value) => {
     }
     
     return value;
-};
+  };
 
-interface CardNumberChangeEvent extends React.ChangeEvent<HTMLInputElement> {}
-
-const handleCardNumberChange = (e: CardNumberChangeEvent): void => {
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const formatted = formatCardNumber(e.target.value)
     setCardDetails({ ...cardDetails, cardNumber: formatted })
-}
+  }
 
-
-interface ExpiryChangeEvent extends React.ChangeEvent<HTMLInputElement> {}
-
-const handleExpiryChange = (e: ExpiryChangeEvent): void => {
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const formatted = formatExpiryDate(e.target.value)
     setCardDetails({ ...cardDetails, expiry: formatted })
-}
+  }
 
   return (
     <div>
@@ -241,7 +241,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
             </div>
 
             <form onSubmit={handleSubmit}>
-                {/* Recipient selection - ส่วนที่ 1 */}
                 <div className="mb-8">
                 <div className="flex items-center mb-4 pb-2 border-b border-[#D6A985] border-opacity-30">
                     <div className="w-8 h-8 rounded-full bg-[#D6A985] flex items-center justify-center text-white font-bold mr-2">
@@ -251,7 +250,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                 </div>
                 
                 <div className="space-y-2">
-                    {/* สำหรับตัวเอง */}
                     <div 
                     className={`block rounded-md p-3 transition duration-200 cursor-pointer border ${selectedRecipient === 'self' ? 'border-[#D6A985] shadow-sm' : 'border-[#AFB2B6] hover:border-[#D6A985] hover:shadow-sm'}`}
                     onClick={() => setSelectedRecipient('self')}
@@ -269,8 +267,7 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                         <span className="text-gray-700">สำหรับตัวเอง</span>
                     </label>
                     </div>
-                    
-                    {/* ส่งเป็นของขวัญ */}
+                  
                     <div className={`block rounded-md transition duration-200 border ${selectedRecipient === 'gift' ? 'border-[#D6A985] shadow-sm' : 'border-[#AFB2B6] hover:border-[#D6A985] hover:shadow-sm'}`}>
                     <div 
                         className="p-3 cursor-pointer"
@@ -304,9 +301,12 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                             อีเมลผู้รับ
                             </label>
                             <input 
-                            type="email" 
-                            placeholder="อีเมลผู้รับ"
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#D6A985] focus:border-[#D6A985]"
+                              type="email" 
+                              placeholder="อีเมลผู้รับ"
+                              value={recipientEmail}
+                              onChange={(e) => setRecipientEmail(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#D6A985] focus:border-[#D6A985]"
+                              required={selectedRecipient === 'gift'}
                             />
                         </div>
                         
@@ -315,8 +315,10 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                             ข้อความแนบของขวัญ (ถ้ามี)
                             </label>
                             <textarea 
-                            placeholder="ข้อความแนบของขวัญ (ถ้ามี)"
-                            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#D6A985] focus:border-[#D6A985] min-h-[80px]"
+                              placeholder="ข้อความแนบของขวัญ (ถ้ามี)"
+                              value={giftMessage}
+                              onChange={(e) => setGiftMessage(e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#D6A985] focus:border-[#D6A985] min-h-[80px]"
                             />
                         </div>
                         </div>
@@ -325,7 +327,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                 </div>
                 </div>
 
-                {/* Payment method - ส่วนที่ 2 ที่ปรับปรุงแล้ว */}
                 <div className="mb-8">
                 <div className="flex items-center mb-4 pb-2 border-b border-[#D6A985] border-opacity-30">
                     <div className="w-8 h-8 rounded-full bg-[#D6A985] flex items-center justify-center text-white font-bold mr-2">
@@ -335,9 +336,8 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                 </div>
                 
                 <div className="space-y-2">
-                    {/* QR พร้อมเพย์ */}
                     <div 
-                    className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${paymentMethod === 'qr' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm transition duration-200`}
+                    className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${paymentMethod === 'qr' || paymentMethod === '' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm transition duration-200`}
                     onClick={() => setPaymentMethod('qr')}
                     >
                     <div className="flex items-center">
@@ -346,7 +346,7 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                             type="radio" 
                             name="payment" 
                             value="qr"
-                            checked={paymentMethod === 'qr'}
+                            checked={paymentMethod === 'qr' || paymentMethod === ''}
                             onChange={() => setPaymentMethod('qr')}
                             className="hidden" 
                         />
@@ -357,7 +357,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     <img src="/images/promptpay.png" alt="PromptPay" className="h-8" />
                     </div>
                     
-                    {/* บัตรเครดิต / บัตรเดบิต */}
                     <div className={`rounded-md transition duration-200 border ${paymentMethod === 'credit' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm`}>
                     <div 
                         className="flex justify-between items-center p-3 cursor-pointer"
@@ -476,7 +475,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     </div>
                     </div>
                     
-                    {/* ชำระเงินผ่านเคาน์เตอร์ */}
                     <div 
                     className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${paymentMethod === 'banking' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm transition duration-200`}
                     onClick={() => setPaymentMethod('banking')}
@@ -504,7 +502,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     </div>
                     </div>
                     
-                    {/* ชำระเงินผ่าน ATM */}
                     <div 
                     className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${paymentMethod === 'mbanking' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm transition duration-200`}
                     onClick={() => setPaymentMethod('mbanking')}
@@ -532,7 +529,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     </div>
                     </div>
                     
-                    {/* ชำระเงินผ่าน TrueMoney */}
                     <div 
                     className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${paymentMethod === 'truemoney' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm transition duration-200`}
                     onClick={() => setPaymentMethod('truemoney')}
@@ -554,7 +550,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     <img src="/images/truemoneywallet.png" alt="TrueMoney" className="h-8" />
                     </div>
                     
-                    {/* ชำระเงินผ่าน Rabbit LINE Pay */}
                     <div 
                     className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${paymentMethod === 'linepay' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm transition duration-200`}
                     onClick={() => setPaymentMethod('linepay')}
@@ -576,7 +571,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     <img src="/images/rabbitlinepay.png" alt="LINE Pay" className="h-8" />
                     </div>
                     
-                    {/* ชำระเงินผ่าน Alipay */}
                     <div 
                     className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${paymentMethod === 'alipay' ? 'border-[#D6A985]' : 'border-[#AFB2B6]'} hover:border-[#D6A985] hover:shadow-sm transition duration-200`}
                     onClick={() => setPaymentMethod('alipay')}
@@ -599,7 +593,6 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     </div>
                 </div>
                 </div>
-                {/* Submit button - ปุ่มสั่งซื้อสินค้า */}
                 <div className="relative border-4 border-[#D6A985] rounded-xl p-[2px]">
                     <div className="absolute inset-0 border-2 border-white rounded-lg m-[4px]"></div>
                     <button 
@@ -608,13 +601,12 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
                     >
                         สั่งซื้อสินค้า
                     </button>
-                </div>
+                  </div>
             </form>
           </div>
         </div>
       </div>
       
-      {/* Terms and Conditions Modal */}
       <TermsModal 
         isOpen={isTermsModalOpen} 
         onClose={() => setIsTermsModalOpen(false)} 
@@ -622,3 +614,4 @@ const handleExpiryChange = (e: ExpiryChangeEvent): void => {
     </div>
   )
 }
+                

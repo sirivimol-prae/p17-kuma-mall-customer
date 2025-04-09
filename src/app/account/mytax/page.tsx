@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link';
-import { ArrowLeft, X, CheckCircle } from 'lucide-react'
+import { ArrowLeft, X, CheckCircle, ChevronDown, Check, Circle } from 'lucide-react'
 import AccountSidebar from '../component/sidebar';
 import { invoicesData, provinces, districts, subdistricts, postalCodes } from './mockdata';
 
@@ -569,7 +569,7 @@ export default function Page() {
                     <div className="relative mr-3">
                       <div className={`w-5 h-5 rounded-full border-2 ${taxType === 'personal' ? 'border-[#A6A6A6]' : 'border-gray-300'}`}>
                         {taxType === 'personal' && (
-                          <div className="w-3 h-3 rounded-full bg-[#A6A6A6] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                          <Circle className="w-3 h-3 text-[#A6A6A6] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" fill="#A6A6A6" />
                         )}
                       </div>
                     </div>
@@ -588,7 +588,7 @@ export default function Page() {
                     <div className="relative mr-3">
                       <div className={`w-5 h-5 rounded-full border-2 ${taxType === 'corporate' ? 'border-[#A6A6A6]' : 'border-gray-300'}`}>
                         {taxType === 'corporate' && (
-                          <div className="w-3 h-3 rounded-full bg-[#A6A6A6] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                          <Circle className="w-3 h-3 text-[#A6A6A6] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" fill="#A6A6A6" />
                         )}
                       </div>
                     </div>
@@ -677,16 +677,21 @@ export default function Page() {
 
                 <div className="mb-4">
                   <label className="block text-[#5F6368] mb-2">ระบุประเภทที่อยู่</label>
-                  <select
-                    name="addressType"
-                    value={newInvoice.addressType}
-                    onChange={handleInputChange}
-                    className={selectClassName}
-                  >
-                    <option value="บ้าน">บ้าน</option>
-                    <option value="ที่ทำงาน">ที่ทำงาน</option>
-                    <option value="อื่นๆ">อื่นๆ</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      name="addressType"
+                      value={newInvoice.addressType}
+                      onChange={handleInputChange}
+                      className={selectClassName}
+                    >
+                      <option value="บ้าน">บ้าน</option>
+                      <option value="ที่ทำงาน">ที่ทำงาน</option>
+                      <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                      <ChevronDown className="h-4 w-4" />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mb-4">
@@ -729,9 +734,7 @@ export default function Page() {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+                        <ChevronDown className="h-4 w-4" />
                       </div>
                     </div>
                   </div>
@@ -754,9 +757,7 @@ export default function Page() {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+                        <ChevronDown className="h-4 w-4" />
                       </div>
                     </div>
                   </div>
@@ -776,9 +777,7 @@ export default function Page() {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+                        <ChevronDown className="h-4 w-4" />
                       </div>
                     </div>
                   </div>
@@ -796,9 +795,7 @@ export default function Page() {
                   />
                   <div className="w-4 h-4 border-[2px] border-[#5F6368] mr-3 flex items-center justify-center">
                     {newInvoice.isDefault && (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#D6A985]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <Check className="h-4 w-4 text-[#D6A985]" strokeWidth={2} />
                     )}
                   </div>
                   <span className="text-[#5F6368]">ตั้งเป็นที่อยู่ปัจจุบัน</span>
@@ -814,9 +811,7 @@ export default function Page() {
                   />
                   <div className="w-4 h-4 border-[2px] border-[#5F6368] mr-3 flex items-center justify-center">
                     {newInvoice.isShippingAddress && (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#D6A985]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <Check className="h-4 w-4 text-[#D6A985]" strokeWidth={2} />
                     )}
                   </div>
                   <span className="text-[#5F6368]">ใช้เป็นที่อยู่จัดส่ง</span>

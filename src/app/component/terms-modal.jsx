@@ -16,18 +16,17 @@ export default function TermsModal({ isOpen, onClose }) {
     
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden' // Prevent scrolling when modal is open
+      document.body.style.overflow = 'hidden'
     }
     
     return () => {
       document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = '' // Restore scrolling when modal is closed
+      document.body.style.overflow = ''
     }
   }, [isOpen, onClose])
   
   useEffect(() => {
     if (isOpen && modalRef.current && contentRef.current) {
-      // Fade in animation
       modalRef.current.style.opacity = '0'
       contentRef.current.style.transform = 'scale(0.95)'
       
@@ -43,7 +42,6 @@ export default function TermsModal({ isOpen, onClose }) {
   
   const handleClose = () => {
     if (modalRef.current && contentRef.current) {
-      // Fade out animation
       modalRef.current.style.opacity = '0'
       contentRef.current.style.transform = 'scale(0.95)'
       
@@ -86,19 +84,19 @@ export default function TermsModal({ isOpen, onClose }) {
           
           <div className="border-t border-gray-200 pt-4">
             <h3 className="text-lg font-semibold text-[#5F6368] mb-2">คุมอง :</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+            <p className='text-[#5F6368] text-[18px]'>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
             
-            <h3 className="text-lg font-semibold text-[#5F6368] mt-4 mb-2">วันหมดอายุ :</h3>
-            <p>31/12/2025 31 ธ.ค. 2025 เวลา 23:59 น.</p>
+            <h3 className="text-[#5F6368] text-[18px] font-semibold mt-4 mb-2">วันหมดอายุ :</h3>
+            <p className='text-[#5F6368] text-[18px]'>31/12/2025 31 ธ.ค. 2025 เวลา 23:59 น.</p>
             
-            <h3 className="text-lg font-semibold text-[#5F6368] mt-4 mb-2">รายละเอียดเงื่อนไขการใช้งาน :</h3>
+            <h3 className="text-[#5F6368] text-[18px] font-semibold mt-4 mb-2">รายละเอียดเงื่อนไขการใช้งาน :</h3>
             <div className="space-y-4 text-gray-600">
-              <p>consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              <p className='text-[#5F6368] text-[18px]'>consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
               
-              <p>aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              <p className='text-[#5F6368] text-[18px]'>aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
               
               <div className="mt-6">
-                <ul className="list-disc pl-5 space-y-1 text-gray-600">
+                <ul className="list-disc pl-5 space-y-1 text-[#5F6368] text-[16px]">
                   <li className="animate-fade-in" style={{ animationDelay: '0ms' }}>1 Coin มีมูลค่าเท่ากับ 1 บาท</li>
                   <li className="animate-fade-in" style={{ animationDelay: '100ms' }}>Coin ที่ได้รับไม่สามารถแลกเปลี่ยนเป็นเงินสดได้</li>
                   <li className="animate-fade-in" style={{ animationDelay: '200ms' }}>Coin มีอายุการใช้งาน 1 ปีนับจากวันที่ได้รับ</li>
@@ -110,10 +108,10 @@ export default function TermsModal({ isOpen, onClose }) {
             </div>
           </div>
           
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex justify-end">
             <button
               onClick={handleClose}
-              className="bg-[#D6A985] text-white px-10 py-2 rounded-md font-bold hover:bg-[#B86A4B] transition duration-300 transform hover:scale-105 active:scale-95"
+              className="bg-[#D6A985] text-white text-[18px] px-10 py-2 rounded-md font-bold transition duration-300 transform hover:scale-105 active:scale-95"
             >
               ตกลง
             </button>
