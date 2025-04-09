@@ -75,7 +75,7 @@ const ProductDetail = () => {
 
       <div className="flex flex-col md:flex-row gap-8 mb-10">
         <div className="md:w-1/2">
-          <div className="relative w-full h-[480px] mb-4 rounded-lg overflow-hidden">
+          <div className="relative w-full h-[380px] mb-4 rounded-lg overflow-hidden">
             <Image
               src={productImages[activeImage]}
               alt="KUMA คอกสุนัขพับได้ XLไซส์พิเศษ"
@@ -84,13 +84,13 @@ const ProductDetail = () => {
               priority
             />
             <button 
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/70 w-8 h-8 rounded-full flex items-center justify-center"
+              className="absolute left-16 top-1/2 transform -translate-y-1/2 bg-white/70 w-8 h-8 rounded-full flex items-center justify-center"
               onClick={() => navigateImage('prev')}
             >
               <ChevronLeft />
             </button>
             <button 
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/70 w-8 h-8 rounded-full flex items-center justify-center"
+              className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-white/70 w-8 h-8 rounded-full flex items-center justify-center"
               onClick={() => navigateImage('next')}
             >
               <ChevronRight />
@@ -100,7 +100,7 @@ const ProductDetail = () => {
             {productImages.map((image, index) => (
               <div 
                 key={index}
-                className={`relative w-[120px] h-[120px] cursor-pointer rounded-lg overflow-hidden ${activeImage === index ? 'border-2 border-[#D6A985]' : 'border border-gray-200'}`}
+                className={`relative w-[80px] h-[80px] cursor-pointer rounded-lg overflow-hidden ${activeImage === index ? 'border-2 border-[#D6A985]' : 'border border-gray-200'}`}
                 onClick={() => handleImageClick(index)}
               >
                 <Image
@@ -113,9 +113,8 @@ const ProductDetail = () => {
             ))}
           </div>
         </div>
-
         <div className="md:w-1/2">
-          <h1 className="text-3xl font-medium text-[#5F6368] mb-2">KUMAま คอกสุนัขพับได้ XLไซส์พิเศษ</h1>
+          <h1 className="text-3xl font-medium text-[#5F6368] mb-2">KUMAま คอกสุนัขพับได้ XL ไซส์พิเศษ</h1>
           <p className="text-[#5F6368] text-xl mb-4">คอกสุนัข คอกสัตว์เลี้ยง มีซิปรูดเปิด-ปิดได้ เต็นท์8เหลี่ยม ที่นอนสุนัขพกพา คอกแมว</p>
 
           <div className="flex items-center mb-4">
@@ -209,13 +208,13 @@ const ProductDetail = () => {
           </div>
 
           <div className="flex gap-4">
-            <button className="w-1/2 px-4 py-3 border-[3px] border-[#D6A985] bg-white text-[#D6A985] text-[20px] rounded-md font-medium flex items-center justify-center">
+            <button className="px-4 py-3 border-[3px] border-[#D6A985] w-[210px] h-[60px] bg-white text-[#D6A985] text-[20px] rounded-[10px] font-medium flex items-center justify-center">
               <ShoppingCart className="mr-2" size={20} />
               เพิ่มไปยังรถเข็น
             </button>
-            <button className="w-1/2 relative px-4 py-3 bg-[#D6A985] text-white rounded-md font-medium text-[20px]">
+            <button className="relative px-4 py-3 bg-[#D6A985] w-[210px] h-[60px] text-white rounded-[10px] font-medium text-[20px]">
               <span className="relative z-10">สั่งซื้อสินค้า</span>
-              <div className="absolute inset-[3px] border-2 border-white rounded-md z-0"></div>
+              <div className="absolute inset-[3px] border-2 border-white rounded-[10px] z-0"></div>
             </button>
           </div>
         </div>
