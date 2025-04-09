@@ -50,4 +50,34 @@ export interface ProductGroup {
       isFlashSale: false,
       discount: 6
     },
+    {
+      id: 5,
+      name: 'KUMAま Test',
+      price: 570,
+      originalPrice: 689,
+      image: '/images/bed2.png',
+      hasDiscount: true,
+      isFlashSale: false,
+      discount: 6
+    },
+    {
+      id: 6,
+      name: 'KUMAま Test',
+      price: 409,
+      originalPrice: 459,
+      image: '/images/roll.png',
+      hasDiscount: true,
+      isFlashSale: false,
+      discount: 10
+    },
+    {
+      id: 7,
+      name: 'KUMAま Test',
+      price: 440,
+      originalPrice: 480,
+      image: '/images/bed2.png',
+      hasDiscount: true,
+      isFlashSale: false,
+      discount: 8
+    }
   ];
