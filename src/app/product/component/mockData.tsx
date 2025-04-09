@@ -85,4 +85,14 @@ export interface DiscountInfo {
     }
   ];
 
+<<<<<<< Updated upstream
 exportTraceState
+=======
+  
+
+  export const Mubmib_check:any = [
+    {
+      "hello" : "world"
+    }
+  ]
+>>>>>>> Stashed changes
