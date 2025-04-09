@@ -71,7 +71,6 @@ const CoinSidebar = () => {
         ))}
       </div>
       
-      {/* Terms and Conditions Modal */}
       <TermsModal 
         isOpen={isTermsModalOpen} 
         onClose={() => setIsTermsModalOpen(false)} 

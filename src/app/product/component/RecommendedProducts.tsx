@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { ShoppingCart, ChevronRight, ChevronLeft } from 'lucide-react';
 import { mockProducts } from '../../categories/component/mockProducts';
 
-// กำหนด interface เพื่อระบุประเภทข้อมูลให้ชัดเจน
 interface Product {
   id: string | number;
   name: string;
@@ -15,11 +14,10 @@ interface Product {
 }
 
 const RecommendedProducts = () => {
-  // ใช้ทุกสินค้าจาก mockProducts แต่แสดงแค่ 5 ตัวในมุมมองปกติ
   const displayProducts = mockProducts as Product[];
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  const scrollAmount = (235 + 24) * 5; // เลื่อนครั้งละ 5 ตัว (ความกว้างของสินค้า + gap) x 5
+  const scrollAmount = (235 + 24) * 5;
 
   const scrollLeft = () => {
     if (sliderRef.current) {
@@ -61,7 +59,6 @@ const RecommendedProducts = () => {
       <div className="h-[0.5px] w-full bg-[#D6A985] mb-4"></div>
       
       <div className="relative px-6">
-        {/* ปุ่มเลื่อนซ้าย */}
         <button 
           onClick={scrollLeft}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-white transition-colors"
@@ -69,7 +66,6 @@ const RecommendedProducts = () => {
           <ChevronLeft color="#D6A985" size={24} />
         </button>
         
-        {/* ปุ่มเลื่อนขวา */}
         <button 
           onClick={scrollRight}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/80 rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-white transition-colors"
@@ -77,7 +73,6 @@ const RecommendedProducts = () => {
           <ChevronRight color="#D6A985" size={24} />
         </button>
         
-        {/* รายการสินค้า - จำกัดการแสดงผลให้เห็นแค่ 5 ตัว แต่ยังสามารถเลื่อนดูเพิ่มเติมได้ */}
         <div className="flex justify-center">
           <div 
             ref={sliderRef}
@@ -85,7 +80,7 @@ const RecommendedProducts = () => {
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
-              maxWidth: 'calc((235px + 24px) * 5 - 24px)' // แสดงแค่ 5 ตัว (กว้างสินค้า + gap) x 5 - gap ตัวสุดท้าย
+              maxWidth: 'calc((235px + 24px) * 5 - 24px)'
             }}
           >
             {displayProducts.map(product => (

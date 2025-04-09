@@ -11,8 +11,8 @@ import ProductDetails from '../component/ProductDetails';
 const ProductDetail = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(''); // เริ่มต้นไม่เลือกขนาด
-  const [selectedType, setSelectedType] = useState(''); // เริ่มต้นไม่เลือกประเภท
+  const [selectedSize, setSelectedSize] = useState(''); 
+  const [selectedType, setSelectedType] = useState(''); 
 
   const productImages = [
     '/images/product/stall_main.png',
@@ -43,11 +43,11 @@ const ProductDetail = () => {
   };
 
   const handleSizeSelect = (sizeId: string) => {
-    setSelectedSize(sizeId === selectedSize ? '' : sizeId); // ถ้าคลิกที่เดิมจะยกเลิกการเลือก
+    setSelectedSize(sizeId === selectedSize ? '' : sizeId); 
   };
 
   const handleTypeSelect = (typeId: string) => {
-    setSelectedType(typeId === selectedType ? '' : typeId); // ถ้าคลิกที่เดิมจะยกเลิกการเลือก
+    setSelectedType(typeId === selectedType ? '' : typeId); 
   };
 
   const handleImageClick = (index: number) => {
@@ -64,7 +64,6 @@ const ProductDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      {/* Breadcrumb */}
       <div className="flex items-center text-gray-600 mb-6">
         <Link href="/" className="flex items-center gap-2 hover:text-[#B86A4B]">
           <ArrowLeft color="#5F6368" />
@@ -74,9 +73,7 @@ const ProductDetail = () => {
         <span className="text-[#D6A985]">KUMAま คอกสุนัขพับได้ XL ไซส์พิเศษ</span>
       </div>
 
-      {/* Session 1: สินค้าหลัก */}
       <div className="flex flex-col md:flex-row gap-8 mb-10">
-        {/* Left: Product Images */}
         <div className="md:w-1/2">
           <div className="relative w-full h-[480px] mb-4 rounded-lg overflow-hidden">
             <Image
@@ -117,12 +114,10 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Right: Product Information */}
         <div className="md:w-1/2">
           <h1 className="text-3xl font-medium text-[#5F6368] mb-2">KUMAま คอกสุนัขพับได้ XLไซส์พิเศษ</h1>
           <p className="text-[#5F6368] text-xl mb-4">คอกสุนัข คอกสัตว์เลี้ยง มีซิปรูดเปิด-ปิดได้ เต็นท์8เหลี่ยม ที่นอนสุนัขพกพา คอกแมว</p>
 
-          {/* Price */}
           <div className="flex items-center mb-4">
             <span className="text-[#5F6368] line-through text-xl">฿749</span>
             <span className="text-[#B86A4B] font-bold text-3xl mx-3">฿720</span>
@@ -131,7 +126,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Size Selection */}
           <div className="mb-6">
             <div className="flex">
               <span className="text-gray-700 w-24 text-[18px] pt-2">ขนาด</span>
@@ -153,7 +147,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Type Selection */}
           <div className="mb-6">
             <div className="flex">
               <span className="text-gray-700 w-24 text-[18px] pt-2">ประเภท</span>
@@ -192,7 +185,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Quantity */}
           <div className="mb-8">
             <div className="flex">
               <span className="text-gray-700 w-24 text-[18px] pt-2">จำนวน</span>
@@ -216,7 +208,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-4">
             <button className="w-1/2 px-4 py-3 border-[3px] border-[#D6A985] bg-white text-[#D6A985] text-[20px] rounded-md font-medium flex items-center justify-center">
               <ShoppingCart className="mr-2" size={20} />
@@ -230,17 +221,13 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* สินค้าแนะนำ */}
       <RecommendedProducts />
 
-      {/* Session 3: รายละเอียดสินค้า และ CoinSidebar */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* รายละเอียดสินค้า (ด้านซ้าย) */}
         <div className="lg:w-3/4">
           <ProductDetails />
         </div>
 
-        {/* CoinSidebar (ด้านขวา) */}
         <div className="lg:w-1/4">
           <CoinSidebar />
         </div>
