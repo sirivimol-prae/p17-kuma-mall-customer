@@ -1,17 +1,36 @@
 'use client'
 
 import React, { useState } from 'react';
-import { Search, User, History, ShoppingCart, ChevronDown, Menu, X } from 'lucide-react';
+import { Search, User, History, ShoppingCart, ChevronDown, Menu, X, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
 import { mockOrders } from '../account/myorder/componrnt/MockData';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMiniCartOpen, setIsMiniCartOpen] = useState(false);
+  
+  // ใช้ข้อมูลจาก mockOrders สำหรับ Mini Cart
   const cartItems = mockOrders[0].items;
+  
+  // คำนวณจำนวนสินค้าในรถเข็น
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  // คำนวณราคารวม
+  const calculateTotal = () => {
+    return cartItems.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+  };
+
+  // คลิกที่ไอคอนรถเข็นเพื่อเปิด/ปิด Mini Cart
   const toggleMiniCart = () => {
     setIsMiniCartOpen(!isMiniCartOpen);
+  };
+
+  // ป้องกันการส่งผ่าน event scroll
+  const handleScroll = (e) => {
+    e.stopPropagation();
   };
 
   return (
@@ -228,15 +247,16 @@ const Navbar = () => {
         <div className="border-b border-[#D9D9D9] mt-4"></div>
       </nav>
 
-      {/* Mini Cart Sidebar - ใช้ transform และ transition สำหรับอนิเมชัน */}
+      {/* Mini Cart Sidebar - ปรับขนาดเป็น 370*680 และทำ scrolling */}
       <div
-        className={`fixed top-0 right-0 h-full bg-white shadow-lg z-50 w-80 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-[680px] bg-white shadow-lg z-50 w-[370px] transform transition-transform duration-300 ease-in-out flex flex-col ${
           isMiniCartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
+        style={{ maxHeight: '680px', width: '370px' }}
       >
         {/* หัวข้อรถเข็น */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg">รถเข็นของฉัน</h2>
+          <h2 className="text-lg text-[#5F6368] font-medium">รถเข็นของฉัน</h2>
           <button 
             onClick={toggleMiniCart}
             className="transition-transform duration-200 hover:rotate-90"
@@ -247,46 +267,94 @@ const Navbar = () => {
 
         {cartItems.length === 0 ? (
           <div className="p-8 text-center">
-            <h3 className="text-xl font-medium mb-2">รถเข็นยังว่าง</h3>
+            <h3 className="text-xl font-medium mb-2 text-[#5F6368]">รถเข็นยังว่าง</h3>
             <p className="text-gray-500">มาเริ่มช้อปกันเลย !</p>
           </div>
         ) : (
           <>
-            {/* รายการสินค้า */}
-            <div className="overflow-y-auto max-h-[calc(100vh-180px)]">
+            {/* โปรโมชั่น - ปรับให้เหมือนหน้า cart */}
+            <div className="mx-4 my-3">
+            <div className="mb-4">
+                <div className="flex items-center">
+                <span className="bg-[#D6A985] text-white font-medium py-1.5 px-3 rounded-md mr-2 text-sm whitespace-nowrap">
+                    โปรโมชั่นKUMAま
+                </span>
+                <span className="text-[#D6A985] font-medium text-sm">
+                    ซื้อครบ 8 รายการ (คละได้ทั้งร้าน)
+                </span>
+                </div>
+                <div className="text-[#D6A985] font-medium text-sm ml-[110px]">
+                รับส่วนลด 15%
+                </div>
+            </div>
+            </div>
+
+            {/* รายการสินค้า - แก้ไขให้สามารถ scroll ได้โดยไม่ถูกบังด้วยส่วนด้านล่าง */}
+            <div 
+              className="flex-1 overflow-y-auto overflow-x-hidden px-4"
+              style={{ paddingBottom: "100px" }}
+              onScroll={handleScroll}
+            >
               {cartItems.map((item) => (
-                <div 
-                  key={item.id} 
-                  className="border-b p-4 flex hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <div className="w-16 h-16 border rounded-md overflow-hidden mr-3">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{item.name}</div>
-                    {item.size && <div className="text-sm text-gray-500">ขนาด: {item.size}</div>}
-                    {item.color && <div className="text-sm text-gray-500">สี: {item.color}</div>}
-                    <div className="flex justify-between mt-1">
-                      <div className="text-sm">จำนวน: {item.quantity}</div>
-                      <div className="font-medium text-red-500">฿{item.price}</div>
+                <div key={item.id} className="mb-4 border-b pb-3">
+                  <div className="flex justify-between">
+                    <div className="flex-shrink-0 mr-3" style={{ width: '105px', height: '105px' }}>
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover border border-gray-200 rounded-md"
+                      />
                     </div>
+                    <div className="flex-1 relative">
+                        <div className="flex items-start">
+                            <div className="font-medium text-[#5F6368] pr-20 truncate whitespace-nowrap overflow-hidden w-full">
+                            {item.name}
+                            </div>
+                            <div className="absolute top-0 right-0">
+                            <div className="text-[#E02424] font-medium text-right">฿{item.price}</div>
+                            {item.originalPrice > item.price && (
+                                <div className="text-gray-400 line-through text-sm text-right">฿{item.originalPrice}</div>
+                            )}
+                            </div>
+                        </div>
+                        
+                        {/* วาเรียนท์สินค้า */}
+                        {item.size && <div className="text-sm text-gray-500">ขนาด : {item.size}</div>}
+                        {item.color && <div className="text-sm text-gray-500">สี: {item.color}</div>}
+                        {item.type && <div className="text-sm text-gray-500">ประเภท: {item.type}</div>}
+                        
+                        {/* จำนวนสินค้า */}
+                        <div className="flex items-center mt-2">
+                            <button className="text-gray-500 rounded-l p-1 w-7 h-7 flex items-center justify-center">
+                            <Minus size={14} />
+                            </button>
+                            <span className="mx-1 px-2 -t h-7 flex items-center text-gray-700 min-w-[30px] justify-center">
+                            {item.quantity}
+                            </span>
+                            <button className="text-gray-500  rounded-r p-1 w-7 h-7 flex items-center justify-center">
+                            <Plus size={14} />
+                            </button>
+                        </div>
+                        </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* ปุ่มไปยังรถเข็น */}
-            <div className="p-4 border-t absolute bottom-0 w-full">
+            {/* ยอดรวมและปุ่มสั่งซื้อสินค้า - ปรับให้ fixed อยู่ด้านล่าง */}
+            <div className="bg-white p-4 border-t w-full">
+              <div className="flex justify-between font-medium text-lg mb-3">
+                <span className="text-gray-700">ยอดสั่งซื้อ</span>
+                <span className="text-gray-700">฿{calculateTotal()}</span>
+              </div>
               <Link href="/cart">
                 <button 
-                  className="w-full bg-gray-200 text-gray-800 py-3 font-medium rounded hover:bg-gray-300 transition-colors duration-200"
+                  className="w-full bg-[#D6A985] text-white py-4 font-semibold rounded-[12px] border-4 border-white shadow-[0_0_0_2px_#D6A985] relative overflow-hidden text-xl"
                   onClick={toggleMiniCart}
                 >
-                  ไปยังรถเข็น
+                  <div className="flex justify-center items-center w-full h-full rounded-lg">
+                    สั่งซื้อสินค้า
+                  </div>
                 </button>
               </Link>
             </div>

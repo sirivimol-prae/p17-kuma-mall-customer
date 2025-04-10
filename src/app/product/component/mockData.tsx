@@ -1,3 +1,4 @@
+import { exportTraceState } from "next/dist/trace";
 
 export interface DiscountInfo {
     type: 'FRIEND' | 'BEST_FRIEND';
