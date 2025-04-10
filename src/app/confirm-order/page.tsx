@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, CreditCard, Calendar, Lock, Check, ChevronDown, X, Edit } from 'lucide-react'
-import { mockOrders } from '../account/myorder/componrnt/MockData'
+import { mockOrders } from '../account/myorder/component/MockData'
 
 const ConfirmOrderPage = () => {
   const [paymentMethod, setPaymentMethod] = useState('qr')

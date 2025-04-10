@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { mockOrders } from '../account/myorder/componrnt/MockData';
+import { mockOrders } from '../account/myorder/component/MockData';
 import { ArrowLeft } from 'lucide-react';
 
 const CartPage = () => {

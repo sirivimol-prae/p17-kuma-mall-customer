@@ -6,12 +6,12 @@ import { ArrowLeft } from 'lucide-react'
 import AccountSidebar from '../component/sidebar';
 import { useSearchParams } from 'next/navigation';
 
-import OrderTabs from './componrnt/OrderTabs';
-import EmptyOrderMessage from './componrnt/EmptyOrderMessage';
-import OrderItem from './componrnt/OrderItem';
-import OrderDetail from './componrnt/OrderDetail';
+import OrderTabs from './component/OrderTabs';
+import EmptyOrderMessage from './component/EmptyOrderMessage';
+import OrderItem from './component/OrderItem';
+import OrderDetail from './component/OrderDetail';
 
-import { mockOrders, trackingInfo } from './componrnt/MockData';
+import { mockOrders, trackingInfo } from './component/MockData';
 
 interface OrderItem {
   id: number;
