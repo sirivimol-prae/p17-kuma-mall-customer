@@ -10,15 +10,42 @@ export async function GET(request: Request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '12');
     const skip = (page - 1) * pageSize;
     const sortBy = searchParams.get('sort') || 'endDate';
-    let minPrice = parseInt(searchParams.get('minPrice') || '0');
-    let maxPrice = parseInt(searchParams.get('maxPrice') || '999');
+    const minPrice = parseInt(searchParams.get('minPrice') || '0');
+    const maxPrice = parseInt(searchParams.get('maxPrice') || '999');
     const categoryParam = searchParams.get('category');
     let categoryIds: number[] = [];
     if (categoryParam) {
       categoryIds = categoryParam.split(',').map(id => parseInt(id));
       console.log('Filtering by categories:', categoryIds);
     }
-    const whereCondition: any = {
+    const whereCondition: {
+      products: {
+        some: {
+          product: {
+            AND: Array<{
+              flash_sale?: {
+                isNot: null;
+              } | {
+                status: string;
+                quantity: { gt: number };
+                end_date: { gt: Date };
+                flash_sale_price: {
+                  gte: number;
+                  lte: number;
+                };
+              };
+            }>;
+          };
+        };
+      };
+      group_categories?: {
+        some: {
+          category_id: {
+            in: number[];
+          };
+        };
+      };
+    } = {
       products: {
         some: {
           product: {
@@ -94,7 +121,7 @@ export async function GET(request: Request) {
         return null;
       }
 
-      let sortedProducts = [...productsWithFlashSale];
+      const sortedProducts = [...productsWithFlashSale];
       if (sortBy === 'priceAsc') {
         sortedProducts.sort((a, b) => a.flash_sale!.flash_sale_price - b.flash_sale!.flash_sale_price);
       } else if (sortBy === 'priceDesc') {

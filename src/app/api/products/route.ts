@@ -10,8 +10,8 @@ export async function GET(request: Request) {
     const pageSize = parseInt(searchParams.get('pageSize') || '12');
     const skip = (page - 1) * pageSize;
     const sortBy = searchParams.get('sort') || 'latest';
-    let minPrice = parseInt(searchParams.get('minPrice') || '0');
-    let maxPrice = parseInt(searchParams.get('maxPrice') || '999');
+    const minPrice = parseInt(searchParams.get('minPrice') || '0');
+    const maxPrice = parseInt(searchParams.get('maxPrice') || '999');
     const collectionParam = searchParams.get('collection');
     let collectionIds: number[] = [];
     
@@ -19,7 +19,25 @@ export async function GET(request: Request) {
       collectionIds = collectionParam.split(',').map(id => parseInt(id));
     }
     
-    let whereCondition: any = {
+    const whereCondition: {
+      products: {
+        some: {
+          product: {
+            price_origin: {
+              gte: number;
+              lte: number;
+            }
+          }
+        }
+      };
+      group_collections?: {
+        some: {
+          collection_id: {
+            in: number[];
+          }
+        }
+      };
+    } = {
       products: {
         some: {
           product: {
@@ -42,7 +60,10 @@ export async function GET(request: Request) {
       };
     }
     
-    let orderBy: any = {};
+    let orderBy: {
+      id?: 'asc' | 'desc';
+      create_Date?: 'asc' | 'desc';
+    } = {};
 
     switch (sortBy) {
       case 'priceAsc':

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 interface DataItem {
   id: number;
   name: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 interface FetchState<T> {

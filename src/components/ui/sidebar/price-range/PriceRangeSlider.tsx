@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface PriceRangeSliderProps {
   initialMin: number;
@@ -30,13 +30,13 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
     setActiveHandle(handle);
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !sliderRef.current || !activeHandle) return;
     
     const sliderRect = sliderRef.current.getBoundingClientRect();
     const sliderWidth = sliderRect.width;
     
-    let percentage = Math.max(0, Math.min(100, ((e.clientX - sliderRect.left) / sliderWidth) * 100));
+    const percentage = Math.max(0, Math.min(100, ((e.clientX - sliderRect.left) / sliderWidth) * 100));
     
     const price = Math.round(min + ((max - min) * percentage / 100));
     
@@ -47,15 +47,15 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
       const newMaxPrice = Math.max(price, priceRange[0] + 10); 
       setPriceRange([priceRange[0], newMaxPrice]);
     }
-  };
+  }, [isDragging, activeHandle, min, max, priceRange]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
       setActiveHandle(null);
       onChange(priceRange[0], priceRange[1]);
     }
-  };
+  }, [isDragging, onChange, priceRange]);
 
   useEffect(() => {
     if (isDragging) {
@@ -67,7 +67,7 @@ const PriceRangeSlider: React.FC<PriceRangeSliderProps> = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, priceRange]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const minHandlePosition = `${((priceRange[0] - min) / (max - min)) * 100}%`;
   const maxHandlePosition = `${((priceRange[1] - min) / (max - min)) * 100}%`;

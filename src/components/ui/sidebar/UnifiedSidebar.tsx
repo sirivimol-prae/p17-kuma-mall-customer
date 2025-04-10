@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import CategoryFilter from './filters/CategoryFilter';
 import CollectionFilter from './filters/CollectionFilter';
@@ -16,7 +16,7 @@ export interface FilterOptions {
 }
 
 interface UnifiedSidebarProps {
-  type: 'product' | 'flashsale';
+  type: 'product' | 'flashsale' | 'all';
   onFilterChange?: (filters: FilterOptions) => void;
   showCategories?: boolean;
   showCollections?: boolean;
@@ -76,7 +76,7 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   const handleCategoryChange = (categoryIds: number[]) => {
     setSelectedCategories(categoryIds);
     
-    let queryParams: Record<string, string | null> = {};
+    const queryParams: Record<string, string | null> = {};
     if (categoryIds.length > 0) {
       queryParams.category = categoryIds.join(',');
     } else {
@@ -112,7 +112,7 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   const handleCollectionChange = (collectionIds: number[]) => {
     setSelectedCollections(collectionIds);
     
-    let queryParams: Record<string, string | null> = {};
+    const queryParams: Record<string, string | null> = {};
     if (type === 'flashsale' && selectedCategories.length > 0) {
       queryParams.category = selectedCategories.join(',');
     }
@@ -161,7 +161,7 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   const handlePriceChange = (min: number, max: number) => {
     setPriceRange([min, max]);
     
-    let queryParams: Record<string, string | null> = {};
+    const queryParams: Record<string, string | null> = {};
     
     if (type === 'flashsale' && selectedCategories.length > 0) {
       queryParams.category = selectedCategories.join(',');
@@ -200,7 +200,7 @@ const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
     setPriceRange([0, 999]);
     
     const sortParam = searchParams.get('sort');
-    let queryParams: Record<string, string | null> = {
+    const queryParams: Record<string, string | null> = {
       category: null,
       collection: null,
       minPrice: '0',

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { ProductGroup, PaginationInfo } from '@/types/product';
-import { createPagination, formatImageUrl, getSortOptions } from './shared';
+import { ProductGroup } from '@/types/product';
+import { createPagination, formatImageUrl } from './shared';
 
 const prisma = new PrismaClient();
 
@@ -29,7 +29,25 @@ export async function getProductsData({
       collectionIds = collectionParam.split(',').map(id => parseInt(id));
     }
 
-    let whereCondition: any = {
+    const whereCondition: {
+      products: {
+        some: {
+          product: {
+            price_origin: {
+              gte: number;
+              lte: number;
+            }
+          }
+        }
+      };
+      group_collections?: {
+        some: {
+          collection_id: {
+            in: number[];
+          }
+        }
+      };
+    } = {
       products: {
         some: {
           product: {
@@ -52,7 +70,10 @@ export async function getProductsData({
       };
     }
 
-    let orderBy: any = {};
+    let orderBy: {
+      id?: 'asc' | 'desc';
+      create_Date?: 'asc' | 'desc';
+    } = {};
     switch (sort) {
       case 'priceAsc':
         orderBy = { id: 'asc' };

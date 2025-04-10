@@ -4,7 +4,7 @@ import { getFlashSaleData } from '@/lib/flashsale';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
-import { FlashSaleContainer } from '@/components/FlashSale';
+import UniversalProductContainer from '@/components/Universal/UniversalProductContainer';
 
 export const metadata: Metadata = {
   title: 'FLASHSALE! | ลดราคาพิเศษสำหรับสินค้าสัตว์เลี้ยง | KUMAま Mall',
@@ -68,9 +68,11 @@ export default async function Page({ searchParams }: { searchParams: SearchParam
         />
       </div>
 
-      <FlashSaleContainer 
+      <UniversalProductContainer 
         products={products}
         pagination={pagination}
+        type="flashsale"
+        title="สินค้า Flash Sale"
         initialSort={sortValue}
         showHeader={true}
         showFilter={true}

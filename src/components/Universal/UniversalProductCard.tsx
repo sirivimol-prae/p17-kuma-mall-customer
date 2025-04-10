@@ -1,16 +1,32 @@
+'use client'
+
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
-import { FlashSaleProduct } from '@/types/product';
+import { ProductGroup, FlashSaleProduct } from '../../types/product';
+import { useEffect, useState, useCallback } from 'react';
 
-interface FlashSaleProductCardProps {
-  product: FlashSaleProduct;
+interface UniversalProductCardProps {
+  product: ProductGroup | FlashSaleProduct;
+  type: 'all' | 'flashsale';
   size?: 'small' | 'medium' | 'large';
 }
 
-const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, size = 'medium' }) => {
-  const formatTimeRemaining = (endDate: string | Date): string => {
+/**
+ * คอมโพเนนต์ Universal สำหรับแสดงการ์ดสินค้า
+ * รองรับทั้งสินค้าทั่วไปและสินค้า Flash Sale
+ */
+const UniversalProductCard: React.FC<UniversalProductCardProps> = ({ 
+  product, 
+  type,
+  size = 'medium' 
+}) => {
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  const isFlashSale = 'endDate' in product || product.isFlashSale;
+
+  const formatTimeRemaining = useCallback((endDate: string | Date): string => {
     const end = new Date(endDate);
     const now = new Date();
     const diffMs = end.getTime() - now.getTime();
@@ -26,7 +42,46 @@ const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, si
     }
     
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ชั่วโมง`;
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isFlashSale && 'endDate' in product && product.endDate) {
+      const updateTimeLeft = () => {
+        setTimeLeft(formatTimeRemaining(product.endDate as string));
+      };
+      
+      updateTimeLeft();
+      const interval = setInterval(updateTimeLeft, 60000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [product, isFlashSale, formatTimeRemaining]);
+
+  const BoldLightningIcon = () => (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 24 24" 
+      width={size === 'small' ? "14" : "16"} 
+      height={size === 'small' ? "14" : "16"} 
+      fill="currentColor"
+      className="mx-[-2px]"
+    >
+      <path d="M13 9h9l-10 13v-9H3l10-13z" />
+    </svg>
+  );
+
+  const PriceFlashIcon = () => (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 24 24" 
+      width={size === 'small' ? "14" : "16"} 
+      height={size === 'small' ? "14" : "16"} 
+      fill="currentColor"
+      className="mr-1 text-[#B86A4B]"
+    >
+      <path d="M13 9h9l-10 13v-9H3l10-13z" />
+    </svg>
+  );
 
   const cardSizes = {
     small: {
@@ -62,53 +117,37 @@ const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, si
   };
 
   const currentSize = cardSizes[size];
-
-  const BoldLightningIcon = () => (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      width={size === 'small' ? "14" : "16"} 
-      height={size === 'small' ? "14" : "16"} 
-      fill="currentColor"
-      className="mx-[-2px]"
-    >
-      <path d="M13 9h9l-10 13v-9H3l10-13z" />
-    </svg>
-  );
-
-  const PriceFlashIcon = () => (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      width={currentSize.zapIcon} 
-      height={currentSize.zapIcon} 
-      fill="currentColor"
-      className="mr-1 text-[#B86A4B]"
-    >
-      <path d="M13 9h9l-10 13v-9H3l10-13z" />
-    </svg>
-  );
+  const productId = product.id;
+  const productName = 'name' in product ? product.name : product.title;
+  const productImage = 'image' in product ? product.image : null;
+  const productPrice = product.price;
+  const productOriginalPrice = 'originalPrice' in product ? product.originalPrice : 0;
+  const discount = 'discount' in product ? product.discount : 0;
+  const hasDiscount = (discount && discount > 0) || ('hasDiscount' in product && product.hasDiscount);
 
   return (
     <div className={`rounded-lg overflow-hidden relative w-full ${currentSize.card} pb-3`}>
-      <Link href={`/product/${product.id}`}>
+      <Link href={`/product/${productId}`}>
         <div className="relative overflow-hidden rounded-[5px]">
-          {product.image ? (
+          {productImage ? (
             <div className={`relative ${currentSize.image}`}>
               <Image
-                src={product.image}
-                alt={product.title}
+                src={productImage}
+                alt={productName}
                 fill
                 sizes={size === 'small' ? '160px' : size === 'medium' ? '235px' : '280px'}
                 className="object-cover"
                 priority={false}
               />
               
-              <div className="absolute bottom-5 left-0 right-0 flex justify-center">
-                <div className={`bg-[#5F6368] bg-opacity-70 text-[#ffffff] font-medium rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)] border border-white ${currentSize.timer}`}>
-                  เหลือเวลาอีก: {formatTimeRemaining(product.endDate)}
+              {/* แสดงเวลาที่เหลือเฉพาะในหน้า Flash Sale หรือสินค้าที่เป็น Flash Sale */}
+              {isFlashSale && (type === 'flashsale' || (type === 'all' && isFlashSale)) && 'endDate' in product && (
+                <div className="absolute bottom-5 left-0 right-0 flex justify-center">
+                  <div className={`bg-[#5F6368] bg-opacity-70 text-[#ffffff] font-medium rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)] border border-white ${currentSize.timer}`}>
+                    เหลือเวลาอีก: {timeLeft || formatTimeRemaining(product.endDate as string)}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className={`bg-gray-100 flex items-center justify-center ${currentSize.image} relative`}>
@@ -117,15 +156,11 @@ const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, si
                 <div className="text-lg text-[#D6A985]">KUMAま</div>
                 <div className="text-sm text-gray-400 mt-1">ไม่มีรูปภาพ</div>
               </div>
-              
-              <div className="absolute bottom-5 left-0 right-0 flex justify-center">
-                <div className={`bg-[#5F6368] bg-opacity-70 text-[#ffffff] font-medium rounded-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.25)] border border-white ${currentSize.timer}`}>
-                  เหลือเวลาอีก: {formatTimeRemaining(product.endDate)}
-                </div>
-              </div>
             </div>
           )}
-          {product.discount > 0 && (
+          
+          {/* แสดงป้ายส่วนลดเฉพาะเมื่อมีส่วนลด */}
+          {hasDiscount && discount && (
             <div className="absolute top-0 right-3">
               <div 
                 className={`relative bg-[#B86A4B] text-white p-2 flex flex-col items-center justify-center rounded-bl-[14px] rounded-br-[14px] ${currentSize.badge}`}
@@ -136,7 +171,7 @@ const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, si
                 <div className="absolute inset-0 border-[4px] border-white rounded-bl-[12px] rounded-br-[12px] m-[4px]"></div>
                 <div className="relative z-10 flex flex-col items-center justify-center">
                   <div className={size === 'small' ? 'text-sm font-bold' : 'text-[16px] font-bold'}>ลด</div>
-                  <div className={size === 'small' ? 'text-sm font-bold' : 'text-[16px] font-bold'}>{product.discount}%</div>
+                  <div className={size === 'small' ? 'text-sm font-bold' : 'text-[16px] font-bold'}>{discount}%</div>
                 </div>
               </div>
             </div>
@@ -147,20 +182,28 @@ const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, si
       <div className="p-0 mb-1">
         <div className="w-full">
           <div className="flex flex-col w-full mb-0">
-            <Link href={`/product/${product.id}`}>
+            <Link href={`/product/${productId}`}>
               <h3 
                 className={`font-medium text-[#5F6368] ${currentSize.title} leading-tight w-full truncate cursor-pointer pl-0 pr-0 ml-0 mr-0 mb-0`}
-                title={product.title}
+                title={productName}
               >
-                {product.title}
+                {productName}
               </h3>
             </Link>
             
             <div className="w-full flex items-center text-[16px]">
-              <span className="bg-[#B86A4B] text-white px-2 py-0 rounded-md flex items-center justify-center">
-                F<BoldLightningIcon />ASH SALE
-              </span>
-              <span className="text-[#D6A985] ml-1">| จำนวนจำกัด!</span>
+              {isFlashSale ? (
+                <span className="bg-[#B86A4B] text-white px-2 py-0 rounded-md flex items-center justify-center">
+                  F<BoldLightningIcon />ASH SALE
+                </span>
+              ) : (
+                <span className="bg-[#D6A985] text-white px-2 py-0 rounded-md">
+                  KUMAま FRIEND
+                </span>
+              )}
+              {isFlashSale && (
+                <span className="text-[#D6A985] ml-1">| จำนวนจำกัด!</span>
+              )}
             </div>
           </div>
         </div>
@@ -170,11 +213,11 @@ const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, si
           {/* คอลัมน์ที่ 1 แถวที่ 1: ราคา */}
           <div className="flex items-center">
             <span className={`text-[#B86A4B] font-bold ${currentSize.price} flex items-center`}>
-              <PriceFlashIcon />฿{product.price.toLocaleString()}
+              {isFlashSale && <PriceFlashIcon />}฿{productPrice.toLocaleString()}
             </span>
-            {product.discount > 0 && (
+            {hasDiscount && discount && (
               <span className={`text-[#A6A6A6] line-through ml-2 ${size === 'small' ? 'text-sm' : 'text-[18px]'}`}>
-                ฿{product.originalPrice.toLocaleString()}
+                ฿{productOriginalPrice.toLocaleString()}
               </span>
             )}
           </div>
@@ -211,4 +254,4 @@ const FlashSaleProductCard: React.FC<FlashSaleProductCardProps> = ({ product, si
   );
 };
 
-export default FlashSaleProductCard;
+export default UniversalProductCard;

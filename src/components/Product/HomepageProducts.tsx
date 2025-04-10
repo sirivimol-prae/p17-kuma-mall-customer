@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ProductGroup } from '@/types/product'
 import { ProductGrid } from '@/components/Product'
@@ -71,7 +72,7 @@ export default function HomepageProducts({ products }: HomepageProductsProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[#D6A985] rounded-full flex items-center justify-center">
-            <img src="/images/paw_icon.png" alt="Paw Icon" className="w-5 h-5" />
+            <Image src="/images/paw_icon.png" alt="Paw Icon" width={20} height={20} className="w-5 h-5" />
           </div>
           <span className="text-[#B86A4B] font-medium text-xl">สินค้าแนะนำ</span>
         </div>

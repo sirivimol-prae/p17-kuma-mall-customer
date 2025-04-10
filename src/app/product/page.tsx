@@ -4,7 +4,7 @@ import { getProductsData } from '@/lib/products';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ProductContainer } from '@/components/Product';
+import UniversalProductContainer from '@/components/Universal/UniversalProductContainer';
 
 export const metadata: Metadata = {
   title: 'สินค้าทั้งหมด | KUMAま Mall - ของใช้และอาหารสัตว์เลี้ยงคุณภาพดี',
@@ -70,9 +70,10 @@ export default async function Page({ searchParams }: { searchParams: SearchParam
         />
       </div>
 
-      <ProductContainer 
+      <UniversalProductContainer 
         products={products}
         pagination={pagination}
+        type="all"
         flashSaleCount={flashSaleCount}
         initialSort={sort}
         showHeader={true}

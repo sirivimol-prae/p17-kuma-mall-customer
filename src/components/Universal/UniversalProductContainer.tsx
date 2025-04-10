@@ -5,15 +5,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
-import ProductGrid from './ProductGrid';
-import { ProductGroup, PaginationInfo } from '@/types/product';
-import Pagination from '@/app/product/component/Pagination';
-import UnifiedSidebar from '@/components/ui/sidebar/UnifiedSidebar';
+import UniversalProductGrid from '../../components/Universal/UniversalProductGrid';
+import { ProductGroup, FlashSaleProduct, PaginationInfo } from '../../types/product';
+import Pagination from '../../app/product/component/Pagination';
+import UnifiedSidebar from '../../components/ui/sidebar/UnifiedSidebar';
 
-interface ProductContainerProps {
-  products: ProductGroup[];
+interface UniversalProductContainerProps {
+  products: (ProductGroup | FlashSaleProduct)[];
   pagination?: PaginationInfo;
   title?: string;
+  type: 'all' | 'flashsale';
   showHeader?: boolean;
   showFilter?: boolean;
   showPagination?: boolean;
@@ -23,12 +24,18 @@ interface ProductContainerProps {
   gap?: 'small' | 'medium' | 'large';
   initialSort?: string;
   className?: string;
+  flashSaleCount?: number;
 }
 
-const ProductContainer: React.FC<ProductContainerProps> = ({
+/**
+ * คอมโพเนนต์ Universal สำหรับแสดงสินค้าทั้งหมดและสินค้า Flash Sale
+ * สามารถใช้ได้ทั้งในหน้าสินค้าทั้งหมดและหน้า Flash Sale
+ */
+const UniversalProductContainer: React.FC<UniversalProductContainerProps> = ({
   products,
   pagination,
-  title = 'สินค้าทั้งหมด',
+  title,
+  type = 'all',
   showHeader = true,
   showFilter = false,
   showPagination = false,
@@ -36,19 +43,30 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
   layout = 'grid',
   columns = 4,
   gap = 'medium',
-  initialSort = 'latest',
+  initialSort,
   className = '',
+  flashSaleCount = 0,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [sortBy, setSortBy] = useState<string>(initialSort);
+  const defaultSort = type === 'flashsale' ? 'endDate' : 'latest';
+  const [sortBy, setSortBy] = useState<string>(initialSort || defaultSort);
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
-  
-  const sortOptions = [
-    { value: 'latest', label: 'สินค้าล่าสุด' },
-    { value: 'priceAsc', label: 'ราคาต่ำ - สูง' },
-    { value: 'priceDesc', label: 'ราคาสูง - ต่ำ' }
-  ];
+
+  const sortOptions = type === 'flashsale' 
+    ? [
+        { value: 'endDate', label: 'ใกล้หมดเวลา' },
+        { value: 'priceAsc', label: 'ราคาต่ำ - สูง' },
+        { value: 'priceDesc', label: 'ราคาสูง - ต่ำ' },
+        { value: 'discount', label: 'ส่วนลดมากสุด' }
+      ]
+    : [
+        { value: 'latest', label: 'สินค้าล่าสุด' },
+        { value: 'priceAsc', label: 'ราคาต่ำ - สูง' },
+        { value: 'priceDesc', label: 'ราคาสูง - ต่ำ' }
+      ];
+
+  const pageTitle = title || (type === 'flashsale' ? 'สินค้า Flash Sale' : 'สินค้าทั้งหมด');
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort);
@@ -81,8 +99,12 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
                 width={32}
                 height={32}
               />
-              <span className="font-medium text-[#B86A4B] text-[24px]">{title}</span>
-
+              <span className="font-medium text-[#B86A4B] text-[24px]">{pageTitle}</span>
+              {type === 'all' && flashSaleCount > 0 && (
+                <span className="ml-2 bg-[#B86A4B] text-white text-sm px-2 py-0.5 rounded-full">
+                  Flash Sale: {flashSaleCount}
+                </span>
+              )}
             </div>
             <div className="relative">
               <button 
@@ -121,10 +143,10 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
         {showFilter && (
           <div className="w-full md:w-1/5 mb-6 md:mb-0">
             <UnifiedSidebar 
-              type="product"
-              showCategories={false} 
-              showCollections={true}
-              showServices={true}
+              type={type}
+              showCategories={type === 'flashsale'}
+              showCollections={type === 'all'}
+              showServices={type === 'all'}
               showPriceRange={true}
             />
           </div>
@@ -132,8 +154,9 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
 
         <div className={`w-full ${showFilter ? 'md:w-4/5' : 'md:w-full'}`}>
           {products.length > 0 ? (
-            <ProductGrid 
+            <UniversalProductGrid 
               products={products} 
+              type={type}
               cardSize={cardSize}
               layout={layout}
               columns={columns}
@@ -141,7 +164,11 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
             />
           ) : (
             <div className="text-center py-12">
-              <p className="text-[#5F6368] text-xl">ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา</p>
+              <p className="text-[#5F6368] text-xl">
+                {type === 'flashsale' 
+                  ? 'ไม่พบสินค้า Flash Sale ที่ตรงกับเงื่อนไขการค้นหา' 
+                  : 'ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา'}
+              </p>
             </div>
           )}
           
@@ -157,8 +184,8 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
       
       {!showPagination && products.length > 0 && layout === 'carousel' && (
         <div className="text-center mt-4">
-          <Link href="/product" className="text-[#D6A985] hover:underline">
-            ดูสินค้าทั้งหมด &rarr;
+          <Link href={type === 'flashsale' ? '/flashsale' : '/product'} className="text-[#D6A985] hover:underline">
+            {type === 'flashsale' ? 'ดูสินค้า Flash Sale ทั้งหมด' : 'ดูสินค้าทั้งหมด'} &rarr;
           </Link>
         </div>
       )}
@@ -166,4 +193,4 @@ const ProductContainer: React.FC<ProductContainerProps> = ({
   );
 };
 
-export default ProductContainer;
+export default UniversalProductContainer;

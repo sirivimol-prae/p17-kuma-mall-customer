@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface Category {
@@ -23,7 +23,7 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  const createQueryString = (params: Record<string, string | null>) => {
+  const createQueryString = useCallback((params: Record<string, string | null>) => {
     const newSearchParams = new URLSearchParams(searchParams.toString());
     
     Object.entries(params).forEach(([key, value]) => {
@@ -35,7 +35,7 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
     });
     
     return newSearchParams.toString();
-  };
+  }, [searchParams]);
   
   const categoryParam = searchParams.get('category');
   const minPriceParam = searchParams.get('minPrice');
@@ -89,8 +89,8 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
     fetchCategories();
   }, []);
 
-  const applyFilters = () => {
-    let queryParams: Record<string, string | null> = {};
+  const applyFilters = useCallback(() => {
+    const queryParams: Record<string, string | null> = {};
 
     if (selectedCategories.length > 0) {
       queryParams.category = selectedCategories.join(',');
@@ -117,7 +117,7 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
         priceRange: priceRange
       });
     }
-  };
+  }, [selectedCategories, priceRange, searchParams, router, pathname, createQueryString, onFilterChange]);
 
   const handleCategoryChange = (categoryId: number) => {
     setSelectedCategories(prev => {
@@ -126,13 +126,9 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
         : [...prev, categoryId];
 
       setTimeout(() => {
-        const newSelectedCategories = prev.includes(categoryId)
-          ? prev.filter(id => id !== categoryId)
-          : [...prev, categoryId];
-          
-        let queryParams: Record<string, string | null> = {};
-        if (newSelectedCategories.length > 0) {
-          queryParams.category = newSelectedCategories.join(',');
+        const queryParams: Record<string, string | null> = {};
+        if (newCategories.length > 0) {
+          queryParams.category = newCategories.join(',');
         } else {
           queryParams.category = null;
         }
@@ -150,7 +146,7 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
         
         if (onFilterChange) {
           onFilterChange({
-            categories: newSelectedCategories,
+            categories: newCategories,
             priceRange: priceRange
           });
         }
@@ -166,13 +162,13 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
     setActiveHandle(handle);
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !sliderRef.current || !activeHandle) return;
     
     const sliderRect = sliderRef.current.getBoundingClientRect();
     const sliderWidth = sliderRect.width;
     
-    let percentage = Math.max(0, Math.min(100, ((e.clientX - sliderRect.left) / sliderWidth) * 100));
+    const percentage = Math.max(0, Math.min(100, ((e.clientX - sliderRect.left) / sliderWidth) * 100));
     
     const price = Math.round(minPrice + ((maxPrice - minPrice) * percentage / 100));
     
@@ -183,9 +179,9 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
       const newMaxPrice = Math.max(price, priceRange[0] + 10); 
       setPriceRange([priceRange[0], newMaxPrice]);
     }
-  };
+  }, [isDragging, activeHandle, minPrice, maxPrice, priceRange, sliderRef]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
       setActiveHandle(null);
@@ -194,7 +190,7 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
         applyFilters();
       }, 100);
     }
-  };
+  }, [isDragging, applyFilters]);
 
   useEffect(() => {
     if (isDragging) {
@@ -206,7 +202,7 @@ const FlashSaleFilter: React.FC<FlashSaleFilterProps> = ({ onFilterChange }) => 
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, priceRange]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const handleReset = () => {
     setSelectedCategories([]);

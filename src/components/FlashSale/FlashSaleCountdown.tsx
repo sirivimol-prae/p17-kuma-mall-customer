@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface FlashSaleCountdownProps {
   endDate: string | Date;
@@ -37,7 +37,7 @@ const FlashSaleCountdown: React.FC<FlashSaleCountdownProps> = ({
     isComplete: false
   });
 
-  const calculateTimeLeft = (): TimeLeft => {
+  const calculateTimeLeft = useCallback((): TimeLeft => {
     const difference = new Date(endDate).getTime() - new Date().getTime();
     
     if (difference <= 0) {
@@ -57,7 +57,7 @@ const FlashSaleCountdown: React.FC<FlashSaleCountdownProps> = ({
       seconds: Math.floor((difference % (1000 * 60)) / 1000),
       isComplete: false
     };
-  };
+  }, [endDate]);
 
   useEffect(() => {
     setTimeLeft(calculateTimeLeft());
@@ -71,7 +71,7 @@ const FlashSaleCountdown: React.FC<FlashSaleCountdownProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [endDate, onComplete]);
+  }, [endDate, onComplete, calculateTimeLeft]);
 
   const formatNumber = (num: number): string => {
     return String(num).padStart(2, '0');

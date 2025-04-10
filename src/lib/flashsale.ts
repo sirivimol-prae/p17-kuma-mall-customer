@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { FlashSaleProduct, PaginationInfo } from '@/types/product';
-import { createPagination, formatImageUrl, getSortOptions } from './shared';
+import { FlashSaleProduct } from '@/types/product';
+import { createPagination, formatImageUrl } from './shared';
 
 const prisma = new PrismaClient();
 
@@ -27,7 +27,34 @@ export async function getFlashSaleData({
       categoryIds = categoryParam.split(',').map(id => parseInt(id));
     }
 
-    const whereCondition: any = {
+    const whereCondition: {
+      products: {
+        some: {
+          product: {
+            AND: Array<{
+              flash_sale?: {
+                isNot: null;
+              } | {
+                status: string;
+                quantity: { gt: number };
+                end_date: { gt: Date };
+                flash_sale_price: {
+                  gte: number;
+                  lte: number;
+                };
+              };
+            }>;
+          };
+        };
+      };
+      group_categories?: {
+        some: {
+          category_id: {
+            in: number[];
+          };
+        };
+      };
+    } = {
       products: {
         some: {
           product: {
@@ -111,7 +138,7 @@ export async function getFlashSaleData({
         continue;
       }
 
-      let sortedProducts = [...productsWithFlashSale];
+      const sortedProducts = [...productsWithFlashSale];
 
       switch (sort) {
         case 'priceAsc':

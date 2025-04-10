@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -55,10 +54,6 @@ export function createPagination(page: number, pageSize: number, totalItems: num
   };
 }
 
-/**
- * ฟังก์ชันสำหรับแปลงข้อมูลเป็นฟอร์แมตที่ต้องการ
- * สามารถใช้ได้กับทั้ง FlashSale และ Product
- */
 export function formatImageUrl(imageUrl: string | null | undefined): string | null {
   if (!imageUrl) return null;
 
@@ -69,9 +64,6 @@ export function formatImageUrl(imageUrl: string | null | undefined): string | nu
   return imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
 }
 
-/**
- * ฟังก์ชันช่วยสำหรับการเรียงลำดับข้อมูล
- */
 export function getSortOptions(sortType: string) {
   switch (sortType) {
     case 'priceAsc':
