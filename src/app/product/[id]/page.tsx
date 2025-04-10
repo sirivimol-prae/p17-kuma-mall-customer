@@ -18,7 +18,6 @@ const ProductDetail = () => {
     '/images/product/stall_main.png',
     '/images/product/stall_1.png',
     '/images/product/stall_2.png',
-    '/images/product/stall_1.png',
   ];
 
   const sizes = [
@@ -75,7 +74,7 @@ const ProductDetail = () => {
 
       <div className="flex flex-col md:flex-row gap-8 mb-10">
         <div className="md:w-1/2">
-          <div className="relative w-full h-[380px] mb-4 rounded-lg overflow-hidden">
+          <div className="relative w-full h-[400px] mb-4 rounded-lg overflow-hidden">
             <Image
               src={productImages[activeImage]}
               alt="KUMA คอกสุนัขพับได้ XLไซส์พิเศษ"
@@ -100,7 +99,7 @@ const ProductDetail = () => {
             {productImages.map((image, index) => (
               <div 
                 key={index}
-                className={`relative w-[80px] h-[80px] cursor-pointer rounded-lg overflow-hidden ${activeImage === index ? 'border-2 border-[#D6A985]' : 'border border-gray-200'}`}
+                className={`relative w-[130px] h-[130px] cursor-pointer rounded-lg overflow-hidden ${activeImage === index ? 'border-2 border-[#D6A985]' : 'border border-gray-200'}`}
                 onClick={() => handleImageClick(index)}
               >
                 <Image
@@ -132,7 +131,7 @@ const ProductDetail = () => {
                 {sizes.map(size => (
                   <button
                     key={size.id}
-                    className={`border px-4 py-2 rounded-md w-[180px] text-center ${
+                    className={`border px-4 py-2 rounded-md w-[160px] h-[40px] text-center ${
                       selectedSize === size.id 
                         ? 'border-[#D6A985] text-[#D6A985]' 
                         : 'border-gray-300 text-gray-600'
@@ -154,7 +153,7 @@ const ProductDetail = () => {
                   {types.slice(0, 3).map(type => (
                     <button
                       key={type.id}
-                      className={`border px-4 py-2 rounded-md w-[180px] text-center ${
+                      className={`border px-4 py-2 rounded-md w-[180px] h-[40px] text-center ${
                         selectedType === type.id 
                           ? 'border-[#D6A985] text-[#D6A985]' 
                           : 'border-gray-300 text-gray-600'
@@ -169,7 +168,7 @@ const ProductDetail = () => {
                   {types.slice(3).map(type => (
                     <button
                       key={type.id}
-                      className={`border px-4 py-2 rounded-md w-[180px] text-center ${
+                      className={`border px-4 py-2 rounded-md w-[180px] h-[40px] text-center ${
                         selectedType === type.id 
                           ? 'border-[#D6A985] text-[#D6A985]' 
                           : 'border-gray-300 text-gray-600'
