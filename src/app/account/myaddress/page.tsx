@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link';
-import { ArrowLeft, X, CheckCircle } from 'lucide-react'
+import { ArrowLeft, X, Check, ChevronDown, Plus, CheckCircle } from 'lucide-react'
 import AccountSidebar from '../component/sidebar';
 
 interface AddressType {
@@ -501,7 +501,7 @@ export default function Page(): React.ReactElement {
                     onClick={handleAddAddress}
                     className="flex items-center px-4 py-2 border border-[#D6A985] text-[#D6A985] font-bold text-[18px] rounded-lg hover:bg-[#F5E1CF] transition-colors"
                   >
-                    <span className="mr-2 font-bold text-[18px]">+</span>
+                    <Plus size={18} className="mr-2" />
                     <span>เพิ่มที่อยู่ใหม่</span>
                   </button>
                 </div>
@@ -510,7 +510,6 @@ export default function Page(): React.ReactElement {
           </div>
         </div>
         
-        {/* โมดัลเพิ่ม/แก้ไขที่อยู่ */}
         {(showAddModal || showEditModal) && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto py-6">
             <div className="bg-white rounded-[10px] w-full max-w-2xl p-6 relative mx-auto my-4 max-h-[90vh] overflow-y-auto">
@@ -567,7 +566,6 @@ export default function Page(): React.ReactElement {
                     </div>
                     <span className="text-[#5F6368]">ที่ทำงาน</span>
                   </label>
-                  
                   <label className="flex items-center cursor-pointer">
                     <input 
                       type="radio" 
@@ -622,7 +620,6 @@ export default function Page(): React.ReactElement {
               <div className="mb-4">
                 <h3 className="font-medium mb-2 text-[#5F6368]">ที่อยู่จัดส่ง</h3>
                 
-                {/* ฟิลด์บ้านเลขที่ */}
                 <div className="mb-4">
                   <label className="block text-[#5F6368] mb-2">บ้านเลขที่</label>
                   <input 
@@ -635,7 +632,6 @@ export default function Page(): React.ReactElement {
                   />
                 </div>
                 
-                {/* ฟิลด์หมู่บ้าน */}
                 <div className="mb-4">
                   <label className="block text-[#5F6368] mb-2">หมู่บ้าน/อาคาร (ถ้ามี)</label>
                   <input 
@@ -648,7 +644,6 @@ export default function Page(): React.ReactElement {
                   />
                 </div>
                 
-                {/* ฟิลด์ซอย */}
                 <div className="mb-4">
                   <label className="block text-[#5F6368] mb-2">ซอย (ถ้ามี)</label>
                   <input 
@@ -661,7 +656,6 @@ export default function Page(): React.ReactElement {
                   />
                 </div>
                 
-                {/* ฟิลด์ถนน */}
                 <div className="mb-4">
                   <label className="block text-[#5F6368] mb-2">ถนน (ถ้ามี)</label>
                   <input 
@@ -674,7 +668,6 @@ export default function Page(): React.ReactElement {
                   />
                 </div>
                 
-                {/* เปลี่ยนการจัดเรียงจากแบบเดิมเป็นแบบ grid 2 คอลัมน์ตาม page_tax */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-[#5F6368] mb-2">รหัสไปรษณีย์</label>
@@ -704,9 +697,7 @@ export default function Page(): React.ReactElement {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+                        <ChevronDown size={16} />
                       </div>
                     </div>
                   </div>
@@ -729,9 +720,7 @@ export default function Page(): React.ReactElement {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+                        <ChevronDown size={16} />
                       </div>
                     </div>
                   </div>
@@ -751,9 +740,7 @@ export default function Page(): React.ReactElement {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
+                        <ChevronDown size={16} />
                       </div>
                     </div>
                   </div>
@@ -771,9 +758,7 @@ export default function Page(): React.ReactElement {
                   />
                   <div className="w-4 h-4 border-[2px] border-[#5F6368] mr-3 flex items-center justify-center">
                     {newAddress.isDefault && (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#D6A985]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <Check size={16} className="text-[#D6A985]" />
                     )}
                   </div>
                   <span className="text-[#5F6368]">ตั้งค่าที่อยู่ปัจจุบัน</span>
@@ -798,7 +783,6 @@ export default function Page(): React.ReactElement {
           </div>
         )}
         
-        {/* โมดัลยืนยันการลบ */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-sm mx-auto">
@@ -821,7 +805,6 @@ export default function Page(): React.ReactElement {
           </div>
         )}
         
-        {/* แจ้งเตือนสำเร็จ */}
         {showSuccessAlert && (
           <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-md p-4 flex items-center">
             <CheckCircle className="text-green-500 mr-2" />
