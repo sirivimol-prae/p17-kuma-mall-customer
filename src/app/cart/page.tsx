@@ -4,13 +4,15 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { mockOrders } from '../account/myorder/component/MockData';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Pencil, Plus, Minus, Check } from 'lucide-react';
 
 const CartPage = () => {
   const cartItems = mockOrders[0].items;
   const [quantities, setQuantities] = useState(
     cartItems.map(item => item.quantity)
   );
+
+  const [isUsingCoins, setIsUsingCoins] = useState(false);
 
   const calculateTotal = () => {
     return cartItems.reduce(
@@ -54,100 +56,106 @@ const CartPage = () => {
           {/* ส่วนรายการสินค้า */}
           <div className="flex-1">
             <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 mr-3 relative">
+              <div className="flex items-center mb-1">
+                <div className="w-12 h-12 relative">
                   <Image
                     src="/images/paw_icon.png"
                     alt="Paw Icon"
-                    width={48}
-                    height={48}
+                    width={40}
+                    height={40}
                     objectFit="contain"
                   />
                 </div>
-                <h2 className="text-2xl font-bold text-[#5F6368]">รถเข็นของฉัน</h2>
+                <h2 className="text-[28px] font-bold text-[#B86A4B]">รถเข็นของฉัน</h2>
               </div>
               
-              <div className="border-t border-gray-100 pt-4">
-                <div className="text-[#B86A4B] font-medium mb-4 text-lg">
+              <div className="border-t border-[#D6A985] pt-4">
+                <div className="text-[#B86A4B] font-medium mb-4 text-[20px]">
                   KUMA ま Note : อุ่นใจได้ พัสดุทุกกล่องไม่แสดงชื่อสินค้า 100%
-                </div>
-                
-                {/* โปรโมชั่น KUMA ま ในบรรทัดเดียวกัน */}
-                <div className="flex items-center mb-6">
-                  <span className="bg-[#D6A985] text-white font-medium py-1.5 px-3 rounded-md mr-2 text-lg">
-                    โปรโมชั่น KUMA ま
-                  </span>
-                  <span className="text-[#D6A985] font-medium text-lg">
-                    ซื้ออีก 8 รายการ (คละได้ทั้งร้าน) รับส่วนลด 15%
-                  </span>
                 </div>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-100">
+                      <tr className="border-b border-[#D9D9D9]">
                         <th className="text-left py-3 text-[#5F6368] font-bold text-xl">สินค้า</th>
                         <th className="text-right py-3 text-[#5F6368] font-bold text-xl">ราคา</th>
                         <th className="text-center py-3 text-[#5F6368] font-bold text-xl">จำนวน</th>
                         <th className="text-right py-3 text-[#5F6368] font-bold text-xl">ราคารวม</th>
                       </tr>
                     </thead>
+                    
+                    {/* โปรโมชั่น KUMA ま ย้ายมาอยู่ตรงนี้ ใต้หัวตาราง */}
                     <tbody>
+                      {/* <tr>
+                        <td colSpan={4} className="py-3">
+                          <div className="flex items-center">
+                            <span className="bg-[#D6A985] text-white font-medium py-1.5 px-3 rounded-[20px] mr-2 text-[18px] inline-flex items-center justify-center min-w-[120px] h-[40px]">
+                              โปรโมชั่น KUMA ま
+                            </span>
+                            <span className="text-[#D6A985] font-medium text-lg">
+                              ซื้ออีก 8 รายการ (คละได้ทั้งร้าน) รับส่วนลด 15%
+                            </span>
+                          </div>
+                        </td>
+                      </tr> */}
+                      
                       {cartItems.map((item, index) => (
-                        <tr key={item.id} className="border-b border-gray-100">
+                        <tr key={item.id} className="border-b border-[#D9D9D9]">
                           <td className="py-4">
-                            <div className="flex items-start">
-                              <div className="w-24 h-24 border border-gray-200 rounded-md overflow-hidden mr-4">
+                            <div className="flex">
+                              <div className="w-[120px] h-[120px] border border-gray-200 rounded-md overflow-hidden mr-4 self-center">
                                 <img
                                   src={item.image}
                                   alt={item.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-[120px] h-[120px] object-cover"
                                 />
                               </div>
-                              <div>
-                                <h3 className="font-bold text-[#5F6368] text-xl">{item.name}</h3>
-                                {item.size && <p className="text-base text-gray-500 mt-1">ขนาด: {item.size}</p>}
-                                {item.color && <p className="text-base text-gray-500">สี: {item.color}</p>}
-                                {item.type && <p className="text-base text-gray-500">ประเภท: {item.type}</p>}
-                                <button className="text-[#B86A4B] text-base mt-2 flex items-center">
-                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
-                                    <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                  </svg>
-                                </button>
+                              <div className="flex flex-col justify-center">
+                                <div className="flex items-center">
+                                  <h3 className="font-bold text-[#5F6368] text-[24px]">{item.name}</h3>
+                                  <button className="ml-2 text-[#B86A4B] flex items-center">
+                                    <Pencil size={16} className="text-[#D6A985]" />
+                                  </button>
+                                </div>
+                                {item.size && <p className="text-[20px] text-[#A6A6A6] mt-1">ขนาด: {item.size}</p>}
+                                {item.color && <p className="text-[20px] text-[#A6A6A6]">สี: {item.color}</p>}
+                                {item.type && <p className="text-[20px] text-[#A6A6A6]">ประเภท: {item.type}</p>}
                               </div>
                             </div>
                           </td>
-                          <td className="text-right align-top pt-4">
-                            <div className="text-[#E02424] font-medium text-xl">฿{item.price}</div>
-                            {item.originalPrice > item.price && (
-                              <div className="text-gray-400 line-through text-lg">฿{item.originalPrice}</div>
+                          <td className="text-right align-middle">
+                          {item.originalPrice > item.price && (
+                              <div className="text-[#5F6368] line-through text-lg">฿{item.originalPrice}</div>
                             )}
-                            <div className="text-gray-400 text-base mt-1">ราคาลดแล้ว</div>
+                            <div className="text-[#C85353] font-medium text-xl">฿{item.price}</div>
+                            
+                            <div className="text-[#C85353] text-[16px] mt-1">ราคาลดแล้ว</div>
                           </td>
-                          <td className="align-top pt-4">
+                          <td className="align-middle">
                             <div className="flex items-center justify-center">
                               <button
-                                className="border border-gray-300 rounded-l w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-xl"
+                                className="border border-[#D9D9D9] rounded-l w-10 h-10 flex items-center justify-center text-[#5F6368] hover:bg-gray-50 text-xl"
                                 onClick={() => handleQuantityChange(index, quantities[index] - 1)}
                               >
-                                −
+                                <Minus />
                               </button>
                               <input
                                 type="text"
-                                className="border-t border-b border-gray-300 w-12 h-10 text-center text-gray-800 text-xl"
+                                className="border-t border-b border-[#D9D9D9] w-12 h-10 text-center text-[#5F6368] text-[20px]"
                                 value={quantities[index]}
                                 readOnly
                               />
                               <button
-                                className="border border-gray-300 rounded-r w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-xl"
+                                className="border border-[#D9D9D9] rounded-r w-10 h-10 flex items-center justify-center text-[#5F6368] hover:bg-gray-50 text-xl"
                                 onClick={() => handleQuantityChange(index, quantities[index] + 1)}
                               >
-                                +
+                                <Plus />
                               </button>
                             </div>
                           </td>
-                          <td className="text-right align-top pt-4">
-                            <div className="text-[#E02424] font-medium text-xl">฿{item.price * quantities[index]}</div>
+                          <td className="text-right align-middle">
+                            <div className="text-[#B86A4B] font-medium text-xl">฿{item.price * quantities[index]}</div>
                           </td>
                         </tr>
                       ))}
@@ -158,49 +166,60 @@ const CartPage = () => {
             </div>
           </div>
 
-          {/* ส่วนสรุปคำสั่งซื้อ */}
-          <div className="w-full lg:w-96">
-            <div className="bg-[#FFFFFF] rounded-2xl shadow-lg p-6 border border-gray-300 sticky top-4">
-              <h2 className="text-2xl font-bold text-[#5F6368] mb-6">สรุปการสั่งซื้อ</h2>
+          <div className="w-[405px] h-[370px]">
+            <div className="bg-[#D9D9D94D] rounded-2xl p-6">
+            <h2 className="text-[24px] font-bold text-[#5F6368] mb-6 border-b border-[#D9D9D9] pb-5">สรุปการสั่งซื้อ</h2>
               
               <div className="space-y-4 mb-6">
-                <div className="flex justify-between text-lg">
-                  <span className="text-gray-500">ยอดรวม</span>
-                  <span className="font-medium text-gray-800">฿{calculateOriginalTotal()}</span>
+                <div className="flex justify-between text-[20px]">
+                  <span className="text-[#5F6368]">ยอดรวม</span>
+                  <span className="font-medium text-[#5F6368]">฿{calculateOriginalTotal()}</span>
                 </div>
-                <div className="flex justify-between text-lg">
-                  <span className="text-gray-500">ส่วนลดพิเศษสำหรับ KUMA ま FRIEND</span>
-                  <span className="font-medium text-[#E02424]">- ฿{totalDiscount}</span>
+                <div className="flex justify-between text-[20px]">
+                  <span className="text-[#5F6368]">ส่วนลดพิเศษสำหรับ KUMA ま FRIEND</span>
+                  <span className="font-medium text-[#5F6368]">- ฿{totalDiscount}</span>
                 </div>
-                <div className="flex justify-between text-lg">
-                  <span className="text-gray-500">ค่าจัดส่งสินค้า</span>
-                  <span className="font-medium text-gray-800">฿120</span>
+                <div className="flex justify-between text-[20px]">
+                  <span className="text-[#5F6368]">ค่าจัดส่งสินค้า</span>
+                  <span className="font-medium text-[#5F6368]">฿120</span>
                 </div>
-                <div className="flex justify-between text-lg">
-                  <span className="text-gray-500">KUMA ま Coin (50 coin)</span>
+                <div className="flex justify-between text-[20px]">
+                  <span className="text-[#5F6368]">KUMA ま Coin (50 coin)</span>
                   <div className="flex items-center">
-                    <span className="font-medium text-[#E02424]">- ฿50</span>
-                    <input type="checkbox" className="ml-2 form-checkbox h-5 w-5 text-[#B86A4B] rounded" />
+                    <span className="font-medium text-[#5F6368]">- ฿50</span>
+                    <label className="inline-flex items-center ml-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="hidden"
+                        checked={isUsingCoins}
+                        onChange={() => setIsUsingCoins(!isUsingCoins)}
+                      />
+                      <div
+                        className={`h-5 w-5 flex items-center justify-center rounded-[3px] border-2 border-[#5F6368]`}
+                      >
+                        {isUsingCoins && <Check size={16} color="#D6A985" strokeWidth={3} />}
+                      </div>
+                    </label>
                   </div>
                 </div>
-                <div className="flex justify-between text-lg text-[#B86A4B]">
-                  <span>คูปองส่วนลดจาก KUMA ま</span>
-                  <span className="underline cursor-pointer">กดใช้คูปอง</span>
+                <div className="flex justify-between text-[20px] ">
+                  <span className='text-[#5F6368]'>คูปองส่วนลดจาก KUMA ま</span>
+                  <span className="underline cursor-pointer text-[#D6A985]">กดใช้คูปอง</span>
                 </div>
               </div>
               
-              <div className="border-t border-gray-100 pt-4">
-                <div className="flex justify-between font-bold text-xl mb-6">
+              <div className="border-t border-[#D9D9D9] pt-4">
+                <div className="flex justify-between font-bold text-[24px] mb-6">
                   <span className="text-[#5F6368]">ยอดสั่งซื้อ</span>
-                  <span className="text-[#5F6368]">฿{calculateTotal() + 120}</span>
+                  <span className="text-[#5F6368]">฿{calculateTotal() + 120 - (isUsingCoins ? 50 : 0)}</span>
                 </div>
                 
                 <div className="flex justify-center items-center relative">
-                  <button className="w-full bg-[#D6A985] text-white py-4 font-semibold rounded-[12px] border-4 border-white shadow-[0_0_0_2px_#D6A985] relative overflow-hidden text-xl">
-                    <div className="flex justify-center items-center w-full h-full rounded-lg">
-                      สั่งซื้อสินค้า
-                    </div>
-                  </button>
+                <button className="w-[365px] h-[55px] bg-[#D6A985] text-white py-4 font-medium rounded-[12px] border-4 border-white shadow-[0_0_0_2px_#D6A985] relative overflow-hidden text-[24px]">
+                  <div className="flex justify-center items-center w-full h-full rounded-lg">
+                    สั่งซื้อสินค้า
+                  </div>
+                </button>
                 </div>
               </div>
             </div>
