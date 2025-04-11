@@ -5,14 +5,38 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { mockOrders } from '../account/myorder/component/MockData';
 import { ArrowLeft, Pencil, Plus, Minus, Check } from 'lucide-react';
+import { EditCartItemModal } from './component/EditCartItemModal';
+
+interface CartItem {
+  id: number | string;
+  name: string;
+  quantity: number;
+  price: number;
+  originalPrice: number;
+  image: string;
+  size?: string;
+  color?: string;
+  type?: string;
+}
+
+interface CartItemEditData {
+  name: string;
+  quantity: number;
+  size?: string;
+  color?: string;
+  type?: string;
+}
 
 const CartPage = () => {
-  const cartItems = mockOrders[0].items;
+  const cartItems = mockOrders[0].items as CartItem[];
   const [quantities, setQuantities] = useState(
     cartItems.map(item => item.quantity)
   );
 
   const [isUsingCoins, setIsUsingCoins] = useState(false);
+  
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentEditItem, setCurrentEditItem] = useState<CartItem | null>(null);
 
   const calculateTotal = () => {
     return cartItems.reduce(
@@ -35,6 +59,42 @@ const CartPage = () => {
       setQuantities(newQuantities);
     }
   };
+  
+  const handleEditItem = (item: CartItem) => {
+    setCurrentEditItem(item);
+    setIsEditModalOpen(true);
+  };
+  
+  const handleSaveEdit = (updatedItemData: CartItemEditData) => {
+    const newCartItems = [...cartItems];
+    
+    if (currentEditItem) {
+      const itemIndex = cartItems.findIndex(item => item.id === currentEditItem.id);
+      
+      if (itemIndex !== -1) {
+        newCartItems[itemIndex] = {
+          ...newCartItems[itemIndex],
+          quantity: updatedItemData.quantity
+        };
+        
+        if ('size' in newCartItems[itemIndex]) {
+          newCartItems[itemIndex].size = updatedItemData.size;
+        }
+        
+        if ('color' in newCartItems[itemIndex]) {
+          newCartItems[itemIndex].color = updatedItemData.color;
+        }
+        
+        if ('type' in newCartItems[itemIndex]) {
+          newCartItems[itemIndex].type = updatedItemData.type;
+        }
+        
+        const newQuantities = [...quantities];
+        newQuantities[itemIndex] = updatedItemData.quantity;
+        setQuantities(newQuantities);
+      }
+    }
+  };
 
   const totalDiscount = calculateOriginalTotal() - calculateTotal();
 
@@ -53,7 +113,6 @@ const CartPage = () => {
 
       <div className="container mx-auto pb-12">
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* ส่วนรายการสินค้า */}
           <div className="flex-1">
             <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
               <div className="flex items-center mb-1">
@@ -114,7 +173,10 @@ const CartPage = () => {
                               <div className="flex flex-col justify-center">
                                 <div className="flex items-center">
                                   <h3 className="font-bold text-[#5F6368] text-[24px]">{item.name}</h3>
-                                  <button className="ml-2 text-[#B86A4B] flex items-center">
+                                  <button 
+                                    className="ml-2 text-[#B86A4B] flex items-center"
+                                    onClick={() => handleEditItem(item)}
+                                  >
                                     <Pencil size={16} className="text-[#D6A985]" />
                                   </button>
                                 </div>
@@ -215,17 +277,26 @@ const CartPage = () => {
                 </div>
                 
                 <div className="flex justify-center items-center relative">
-                <button className="w-[365px] h-[55px] bg-[#D6A985] text-white py-4 font-medium rounded-[12px] border-4 border-white shadow-[0_0_0_2px_#D6A985] relative overflow-hidden text-[24px]">
-                  <div className="flex justify-center items-center w-full h-full rounded-lg">
-                    สั่งซื้อสินค้า
-                  </div>
-                </button>
+                <Link href="/confirm-order">
+                  <button className="w-[365px] h-[55px] bg-[#D6A985] text-white py-4 font-medium rounded-[12px] border-4 border-white shadow-[0_0_0_2px_#D6A985] relative overflow-hidden text-[24px]">
+                    <div className="flex justify-center items-center w-full h-full rounded-lg">
+                      สั่งซื้อสินค้า
+                    </div>
+                  </button>
+                </Link>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <EditCartItemModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        item={currentEditItem}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 };
