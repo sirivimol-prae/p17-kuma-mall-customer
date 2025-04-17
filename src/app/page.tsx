@@ -31,13 +31,17 @@ export default async function Page() {
   });
   
   return (
-    <main>
-      <BannerSlider 
-        images={bannerImages}
-        autoSlideInterval={5000}
-      />
-      <HomepageFlashSale products={flashSaleProducts} />
-      <HomepageProducts products={regularProducts} />
+    <main className="p-0 m-0">
+      <div className="w-full p-0 m-0">
+        <BannerSlider 
+          images={bannerImages}
+          autoSlideInterval={5000}
+        />
+      </div>
+      <div className="mt-0">
+        <HomepageFlashSale products={flashSaleProducts} />
+        <HomepageProducts products={regularProducts} />
+      </div>
     </main>
   );
 }

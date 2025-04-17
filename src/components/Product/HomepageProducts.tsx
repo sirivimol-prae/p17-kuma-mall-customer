@@ -53,13 +53,13 @@ export default function HomepageProducts({ products }: HomepageProductsProps) {
 
   const scrollLeft = () => {
     if (containerRef.current) {
-      containerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+      containerRef.current.scrollBy({ left: -235, behavior: 'smooth' });
     }
   };
   
   const scrollRight = () => {
     if (containerRef.current) {
-      containerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+      containerRef.current.scrollBy({ left: 235, behavior: 'smooth' });
     }
   };
   
@@ -68,7 +68,7 @@ export default function HomepageProducts({ products }: HomepageProductsProps) {
   }
   
   return (
-    <div className="max-w-[1255px] mx-auto px-4 my-6">
+    <div className="max-w-[1440px] mx-auto px-4 pt-6 pb-8">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-[#D6A985] rounded-full flex items-center justify-center">
@@ -96,14 +96,14 @@ export default function HomepageProducts({ products }: HomepageProductsProps) {
 
         <div 
           ref={containerRef}
-          className="flex overflow-x-auto gap-4 px-8 py-2 no-scrollbar"
+          className="flex overflow-x-auto gap-6 px-8 py-2 no-scrollbar"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <ProductGrid 
             products={filteredProducts}
             cardSize="small"
             layout="carousel"
-            gap="small"
+            gap="medium"
           />
         </div>
 
