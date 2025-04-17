@@ -2,6 +2,10 @@ import React from 'react';
 import BannerSlider from '@/components/BannerSlider';
 import HomepageFlashSale from '@/components/HomepageFlashSale';
 import HomepageProducts from '@/components/Product/HomepageProducts';
+import WelcomeBanner from '@/components/WelcomeBanner';
+import ProductCategories from '@/components/ProductCategories';
+import ProductSetBanner from '@/components/ProductSetBanner';
+import PromotionBanner from '@/components/PromotionBanner';
 import { getFlashSaleData } from '@/lib/flashsale';
 import { getProductsData } from '@/lib/products';
 
@@ -40,6 +44,10 @@ export default async function Page() {
       </div>
       <div className="mt-0">
         <HomepageFlashSale products={flashSaleProducts} />
+        <WelcomeBanner />
+        <ProductCategories />
+        <ProductSetBanner />
+        <PromotionBanner />
         <HomepageProducts products={regularProducts} />
       </div>
     </main>

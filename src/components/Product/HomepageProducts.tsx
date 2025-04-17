@@ -77,11 +77,13 @@ export default function HomepageProducts({ products }: HomepageProductsProps) {
           <span className="text-[#B86A4B] font-medium text-xl">สินค้าแนะนำ</span>
         </div>
         
-        <Link href="/product" className="text-[#D6A985] flex items-center gap-1">
+        <Link href="/product" className="text-[#B86A4B] flex items-center gap-1 text-[24px]">
           ดูทั้งหมด
           <ChevronRight size={16} />
         </Link>
       </div>
+
+      <div className="border-b border-[#D6A985] mb-4"></div>
 
       <div className="relative">
         {showLeftArrow && (

@@ -116,11 +116,13 @@ export default function HomepageFlashSale({ products }: HomepageFlashSaleProps) 
           )}
         </div>
         
-        <Link href="/flashsale" className="text-[#B86A4B] flex items-center gap-1 font-medium">
+        <Link href="/flashsale" className="text-[#B86A4B] flex items-center gap-1 text-[24px]">
           ดูทั้งหมด
           <ChevronRight size={16} />
         </Link>
       </div>
+
+      <div className="border-b border-[#D6A985] mb-4"></div>
 
       <div className="relative">
         {showLeftArrow && (
@@ -135,16 +137,19 @@ export default function HomepageFlashSale({ products }: HomepageFlashSaleProps) 
 
         <div 
           ref={containerRef}
-          className="flex overflow-x-auto gap-6 px-8 py-2 no-scrollbar"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex overflow-x-auto overflow-y-hidden gap-6 px-8 pb-3 no-scrollbar"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            height: '410px'  // กำหนดความสูงให้พอดีกับ FlashSaleProductCard
+          }}
         >
           {sortedProducts.map((product) => (
             <div 
               key={product.id} 
               className="flex-shrink-0" 
               style={{ 
-                width: '235px',
-                height: '350px'
+                width: '235px'
               }}
             >
               <FlashSaleProductCard product={product} size="medium" />
