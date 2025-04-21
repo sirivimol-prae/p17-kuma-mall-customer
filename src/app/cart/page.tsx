@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { mockOrders } from '../account/myorder/component/MockData';
-import { ArrowLeft, Pencil, Plus, Minus, Check } from 'lucide-react';
+import { ArrowLeft, Pencil, Plus, Minus, Check, X } from 'lucide-react';
 import { EditCartItemModal } from './component/EditCartItemModal';
+import { useRouter } from 'next/navigation';
 
 interface CartItem {
   id: number | string;
@@ -27,22 +28,40 @@ interface CartItemEditData {
   type?: string;
 }
 
+interface UsedCoupon {
+  id: string | number;
+  title: string;
+  discount: number;
+  type: string;
+}
+
 const CartPage = () => {
+  const router = useRouter();
   const cartItems = mockOrders[0].items as CartItem[];
   const [quantities, setQuantities] = useState(
     cartItems.map(item => item.quantity)
   );
 
   const [isUsingCoins, setIsUsingCoins] = useState(false);
+  const [usedCoupon, setUsedCoupon] = useState<UsedCoupon | null>(null);
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentEditItem, setCurrentEditItem] = useState<CartItem | null>(null);
 
+  useEffect(() => {
+    const storedCoupon = localStorage.getItem('usedCoupon');
+    if (storedCoupon) {
+      setUsedCoupon(JSON.parse(storedCoupon));
+    }
+  }, []);
+
   const calculateTotal = () => {
-    return cartItems.reduce(
+    const total = cartItems.reduce(
       (acc, item, index) => acc + item.price * quantities[index],
       0
     );
+    localStorage.setItem('cartTotal', JSON.stringify(total));
+    return total;
   };
 
   const calculateOriginalTotal = () => {
@@ -50,6 +69,18 @@ const CartPage = () => {
       (acc, item, index) => acc + item.originalPrice * quantities[index],
       0
     );
+  };
+
+  const calculateCouponDiscount = () => {
+    if (!usedCoupon) return 0;
+    
+    if (usedCoupon.type === 'discount') {
+      return usedCoupon.discount;
+    } else if (usedCoupon.type === 'shipping') {
+      return 0; 
+    }
+    
+    return 0;
   };
 
   const handleQuantityChange = (index: number, newQuantity: number) => {
@@ -95,8 +126,17 @@ const CartPage = () => {
       }
     }
   };
+  
+  const handleRemoveCoupon = () => {
+    localStorage.removeItem('usedCoupon');
+    setUsedCoupon(null);
+  };
 
   const totalDiscount = calculateOriginalTotal() - calculateTotal();
+  const couponDiscount = calculateCouponDiscount();
+  const shippingFee = usedCoupon?.type === 'shipping' ? 0 : 120;
+  
+  const finalTotal = calculateTotal() + shippingFee - couponDiscount - (isUsingCoins ? 50 : 0);
 
   return (
     <div className="min-h-screen ">
@@ -228,7 +268,7 @@ const CartPage = () => {
             </div>
           </div>
 
-          <div className="w-[405px] h-[370px]">
+          <div className="w-[405px]">
             <div className="bg-[#D9D9D94D] rounded-2xl p-6">
             <h2 className="text-[24px] font-bold text-[#5F6368] mb-6 border-b border-[#D9D9D9] pb-5">สรุปการสั่งซื้อ</h2>
               
@@ -243,7 +283,12 @@ const CartPage = () => {
                 </div>
                 <div className="flex justify-between text-[20px]">
                   <span className="text-[#5F6368]">ค่าจัดส่งสินค้า</span>
-                  <span className="font-medium text-[#5F6368]">฿120</span>
+                  <span className="font-medium text-[#5F6368]">
+                    {usedCoupon?.type === 'shipping' ? 
+                      <span className="text-[#C85353]">ฟรี</span> : 
+                      `฿120`
+                    }
+                  </span>
                 </div>
                 <div className="flex justify-between text-[20px]">
                   <span className="text-[#5F6368]">KUMA ま Coin (50 coin)</span>
@@ -264,16 +309,46 @@ const CartPage = () => {
                     </label>
                   </div>
                 </div>
-                <div className="flex justify-between text-[20px] ">
-                  <span className='text-[#5F6368]'>คูปองส่วนลดจาก KUMA ま</span>
-                  <span className="underline cursor-pointer text-[#D6A985]">กดใช้คูปอง</span>
-                </div>
+                {usedCoupon ? (
+                  <div className="flex justify-between text-[20px] items-center">
+                    <span className='text-[#5F6368]'>คูปองส่วนลดจาก KUMA ま</span>
+                    <div className="flex items-center">
+                      <span className="font-medium text-[#C85353] mr-2">
+                        {usedCoupon.type === 'discount' ? `- ฿${usedCoupon.discount}` : 'ส่งฟรี'}
+                      </span>
+                      <button
+                        onClick={handleRemoveCoupon}
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-between text-[20px] ">
+                    <span className='text-[#5F6368]'>คูปองส่วนลดจาก KUMA ま</span>
+                    <Link href="/account/coupon"><span className="underline cursor-pointer text-[#D6A985]">กดใช้คูปอง</span></Link>
+                  </div>
+                )}
+                
+                {usedCoupon && (
+                  <div className="mt-2 p-2 bg-[#FAF7F2] rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-[#D6A985] rounded-full flex items-center justify-center mr-2">
+                        <Check size={16} color="white" />
+                      </div>
+                      <span className="text-[#B86A4B] text-[16px]">
+                        {usedCoupon.title}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="border-t border-[#D9D9D9] pt-4">
                 <div className="flex justify-between font-bold text-[24px] mb-6">
                   <span className="text-[#5F6368]">ยอดสั่งซื้อ</span>
-                  <span className="text-[#5F6368]">฿{calculateTotal() + 120 - (isUsingCoins ? 50 : 0)}</span>
+                  <span className="text-[#5F6368]">฿{finalTotal}</span>
                 </div>
                 
                 <div className="flex justify-center items-center relative">

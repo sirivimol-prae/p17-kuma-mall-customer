@@ -1,22 +1,36 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react'
 import AccountSidebar from '../component/sidebar';
 import { coupons, Coupon } from './component/mockData';
+import { useRouter } from 'next/navigation';
 
 export default function Page(): React.ReactElement {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('คูปองที่ใช้ได้');
   const [couponCode, setCouponCode] = useState('');
+  const [couponList, setCouponList] = useState(coupons);
 
   const filteredCoupons = useMemo(() => {
     if (activeTab === 'คูปองที่ใช้ได้') {
-      return coupons.filter(coupon => !coupon.isExpired && !coupon.isUsed);
+      return couponList.filter(coupon => !coupon.isExpired && !coupon.isUsed);
     } else {
-      return coupons.filter(coupon => coupon.isExpired || coupon.isUsed);
+      return couponList.filter(coupon => coupon.isExpired || coupon.isUsed);
     }
-  }, [activeTab]);
+  }, [activeTab, couponList]);
+
+  useEffect(() => {
+    const storedCoupon = localStorage.getItem('usedCoupon');
+    if (storedCoupon) {
+      const usedCouponData = JSON.parse(storedCoupon);
+      const updatedCoupons = couponList.map(coupon => 
+        coupon.id === usedCouponData.id ? { ...coupon, isUsed: true } : coupon
+      );
+      setCouponList(updatedCoupons);
+    }
+  }, []);
 
   const handleCouponCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCouponCode(e.target.value);
@@ -94,7 +108,20 @@ export default function Page(): React.ReactElement {
             
             <div className="space-y-6">
               {filteredCoupons.map((coupon) => (
-                <CouponCard key={coupon.id} coupon={coupon} />
+                <CouponCard 
+                  key={coupon.id} 
+                  coupon={coupon} 
+                  onUseCoupon={(usedCoupon) => {
+                    const updatedCoupons = couponList.map(c => 
+                      c.id === usedCoupon.id ? { ...c, isUsed: true } : c
+                    );
+                    setCouponList(updatedCoupons);
+                    
+                    setActiveTab('คูปองที่ใช้แล้ว / หมดอายุ');
+                    
+                    router.push('/cart');
+                  }}
+                />
               ))}
               
               {filteredCoupons.length === 0 && (
@@ -110,8 +137,15 @@ export default function Page(): React.ReactElement {
   );
 }
 
-const CouponCard = ({ coupon }: { coupon: Coupon }) => {
+const CouponCard = ({ 
+  coupon, 
+  onUseCoupon 
+}: { 
+  coupon: Coupon, 
+  onUseCoupon: (coupon: Coupon) => void 
+}) => {
   const [showTerms, setShowTerms] = useState(false);
+  const [showUseCouponPopup, setShowUseCouponPopup] = useState(false);
   
   const getBackgroundImage = () => {
     return coupon.type === 'discount' 
@@ -121,6 +155,7 @@ const CouponCard = ({ coupon }: { coupon: Coupon }) => {
 
   const openTermsPopup = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setShowTerms(true);
     document.body.style.overflow = 'hidden';
   };
@@ -129,10 +164,58 @@ const CouponCard = ({ coupon }: { coupon: Coupon }) => {
     setShowTerms(false);
     document.body.style.overflow = 'auto';
   };
+  
+  const openUseCouponPopup = () => {
+    console.log('Opening coupon popup for:', coupon.title);
+    setShowUseCouponPopup(true);
+    document.body.style.overflow = 'hidden';
+  };
+  
+  const closeUseCouponPopup = () => {
+    setShowUseCouponPopup(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const handleUseCoupon = () => {
+    let discountAmount = 0;
+    const totalAmount = JSON.parse(localStorage.getItem('cartTotal') || '0');
+    
+    if (coupon.type === 'discount') {
+      const percentMatch = coupon.title.match(/(\d+)%/);
+      if (percentMatch && percentMatch[1]) {
+        const discountPercent = parseInt(percentMatch[1], 10);
+        const calculatedDiscount = (totalAmount * discountPercent) / 100;
+        
+        const maxLimitMatch = coupon.title.match(/สูงสุด ฿(\d+)/);
+        if (maxLimitMatch && maxLimitMatch[1]) {
+          const maxLimit = parseInt(maxLimitMatch[1], 10);
+          discountAmount = Math.min(calculatedDiscount, maxLimit);
+        } else {
+          discountAmount = calculatedDiscount;
+        }
+      } else {
+        discountAmount = 50;
+      }
+    }
+    
+    localStorage.setItem('usedCoupon', JSON.stringify({
+      id: coupon.id,
+      title: coupon.title,
+      discount: discountAmount,
+      type: coupon.type
+    }));
+    
+    closeUseCouponPopup();
+    
+    onUseCoupon(coupon);
+  };
 
   return (
     <>
-      <div className="flex overflow-hidden border border-gray-200 border-l-0 rounded-lg">
+      <div 
+        className={`flex overflow-hidden border border-gray-200 border-l-0 rounded-lg ${!coupon.isExpired && !coupon.isUsed ? 'cursor-pointer' : ''}`}
+        onClick={!coupon.isExpired && !coupon.isUsed ? openUseCouponPopup : undefined}
+      >
         <div 
           className="relative w-56 flex-shrink-0" 
           style={{ 
@@ -149,7 +232,9 @@ const CouponCard = ({ coupon }: { coupon: Coupon }) => {
         </div>
 
         <div className="flex-1 p-4 bg-white">
-          <div className={`text-${coupon.type === 'discount' ? '[#B86A4B]' : '[#5F6368]'} text-[24px] font-bold`}>
+          <div 
+            className={coupon.type === 'discount' ? 'text-[#B86A4B] text-[24px] font-bold' : 'text-[#5F6368] text-[24px] font-bold'}
+          >
             {coupon.title}
           </div>
           <div className="text-[#5F6368] mt-1 text-[18px]">
@@ -170,7 +255,9 @@ const CouponCard = ({ coupon }: { coupon: Coupon }) => {
           </div>
           <div className="text-[#5F6368] text-[18px] mt-3">
             {coupon.isExpired ? (
-              <span className="text-red-500">หมดอายุแล้ว</span>
+              <span className="text-[#C85353]">หมดอายุแล้ว</span>
+            ) : coupon.isUsed ? (
+              <span className="text-[#C85353]">ใช้แล้ว</span>
             ) : (
               <>ใช้ก่อน {coupon.expireDate}</>
             )}
@@ -228,6 +315,43 @@ const CouponCard = ({ coupon }: { coupon: Coupon }) => {
                   className="bg-[#D6A985] text-white py-2 px-8 rounded-md hover:bg-[#c49976] transition duration-200 text-[18px]"
                 >
                   ตกลง
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {showUseCouponPopup && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
+          <div className="bg-white rounded-lg w-[400px] mx-4 relative p-6">
+            <div className="text-center">
+              <h3 className="text-2xl font-medium text-[#5F6368] mb-2">คุณต้องการใช้คูปองหรือไม่ ?</h3>
+              <p className="text-[#5F6368] text-lg mb-6">คุณต้องการใช้คูปองส่วนลด {coupon.title}</p>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleUseCoupon}
+                  className="flex-1 bg-[#D6A985] text-white py-3 px-6 rounded-md hover:bg-[#c49976] transition duration-200 text-xl"
+                >
+                  ใช้
+                </button>
+                <button 
+                  onClick={closeUseCouponPopup}
+                  className="flex-1 bg-white text-[#5F6368] border border-[#D9D9D9] py-3 px-6 rounded-md hover:bg-gray-50 transition duration-200 text-xl"
+                >
+                  ไม่
                 </button>
               </div>
             </div>

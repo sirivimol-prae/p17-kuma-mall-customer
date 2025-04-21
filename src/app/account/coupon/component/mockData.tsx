@@ -38,6 +38,24 @@ export interface Coupon {
       }
     },
     {
+      id: 'coupon-5',
+      type: 'discount',
+      backgroundColor: '#D6A985',
+      image: '/images/kuma-mall-level.png',
+      title: 'ส่วนลด 10% สูงสุด ฿20',
+      minSpend: 100,
+      tag: 'FIRST ORDER BENEFITS',
+      tagColor: '#D6A985',
+      expireDate: '31/12/2024',
+      isExpired: false,
+      isUsed: false,
+      terms: {
+        couponName: 'Lorem ipsum dolor sit amet,',
+        expireDateTime: '31/12/2025 31 ธ.ค. 2025 เวลา 23:59 น.',
+        details: 'consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n\naliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+      }
+    },
+    {
       id: 'coupon-2',
       type: 'shipping',
       backgroundColor: '#7987D2',
