@@ -65,7 +65,7 @@ const Footer = () => {
               <li><Link href="/account/myorder?tab=all" className="text-[16px] hover:underline leading-tight">คำสั่งซื้อสินค้า</Link></li>
               <li><Link href="/account/myorder?tab=payment" className="text-[16px] hover:underline leading-tight">การชำระเงิน</Link></li>
               <li><Link href="/account/myorder?tab=shipping" className="text-[16px] hover:underline leading-tight">สถานะการจัดส่ง</Link></li>
-              <li><Link href="#" className="text-[16px] hover:underline leading-tight">นโยบายการเปลี่ยน/คืนสินค้า</Link></li>
+              <li><Link href="/account/policy" className="text-[16px] hover:underline leading-tight">นโยบายการเปลี่ยน/คืนสินค้า</Link></li>
             </ul>
           </div>
           

@@ -141,8 +141,8 @@ const ConfirmOrderPage = () => {
       {/* ส่วนซ้าย: โลโก้และชื่อ */}
       <div className="flex items-center">
         <img src="/images/logo.png" alt="logo" className="w-12 h-12" />
-        <span className="mx-2 text-gray-500">|</span>
-        <h1 className="text-2xl font-bold text-[#5F6368]">คำสั่งซื้อของฉัน</h1>
+        <span className="mx-2 h-10 w-px bg-gray-500 inline-block" />
+        <h1 className="text-[28px] font-bold text-[#5F6368]">คำสั่งซื้อของฉัน</h1>
       </div>
 
       {/* ส่วนกลาง: ขั้นตอนการสั่งซื้อ */}
@@ -164,9 +164,9 @@ const ConfirmOrderPage = () => {
       </div>
 
       {/* ส่วนขวา: ปุ่มกลับ */}
-      <Link href="/cart" className="flex items-center gap-2 text-[#B86A4B]">
-        <ArrowLeft size={20} color="#B86A4B" />
-        <span>กลับไปที่รถเข็นของฉัน</span>
+      <Link href="/cart" className="flex items-center gap-2 text-[#D6A985]">
+        <ArrowLeft size={24} color="#D6A985" />
+        <span className='text-[20px]'>กลับไปที่รถเข็นของฉัน</span>
       </Link>
     </div>
   </div>
@@ -778,86 +778,28 @@ const ConfirmOrderPage = () => {
 
             {/* ส่วนขวา - สรุปคำสั่งซื้อ */}
             <div className="w-full lg:w-96">
-              <div className="bg-[#FFFFFF] rounded-2xl shadow-lg p-6 border border-gray-300 sticky top-4">
+              <div className="bg-[#FFFFFF] rounded-2xl shadow-lg p-6 border border-gray-300 top-4">
                 <h2 className="text-2xl font-bold text-[#5F6368] mb-6">สรุปการสั่งซื้อ</h2>
-                
-                {/* รายการสินค้า */}
-                <div className="space-y-4 mb-6">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex items-start border-b border-gray-100 pb-4">
-                      <div className="w-20 h-20 border border-gray-200 rounded-md overflow-hidden mr-3">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className="w-full h-full object-cover" 
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-[#5F6368]">{item.name}</h3>
-                        <div className="flex justify-between mt-2">
-                          <div className="text-gray-500">x{item.quantity}</div>
-                          <div className="text-[#E02424] font-medium">฿{item.price * item.quantity}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
                 
                 {/* สรุปรายการและราคา */}
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-lg">
-                    <span className="text-gray-500">ยอดรวม</span>
+                    <span className="text-gray-500">ยอดรวมการสั่งซื้อ</span>
                     <span className="font-medium text-gray-800">฿{calculateOriginalTotal()}</span>
                   </div>
                   <div className="flex justify-between text-lg">
-                    <span className="text-gray-500">ส่วนลดพิเศษสำหรับ KUMA ま FRIEND</span>
+                    <span className="text-gray-500">ส่วนลด</span>
                     <span className="font-medium text-[#E02424]">- ฿{totalDiscount}</span>
                   </div>
                   <div className="flex justify-between text-lg">
                     <span className="text-gray-500">ค่าจัดส่งสินค้า</span>
                     <span className="font-medium text-gray-800">฿{shippingFee}</span>
-                  </div>
-                  <div className="flex justify-between text-lg">
-                    <span className="text-gray-500">KUMA ま Coin (50 coin)</span>
-                    <div className="flex items-center">
-                      <span className="font-medium text-[#E02424]">- ฿{coinDiscount}</span>
-                      <input 
-                        type="checkbox" 
-                        checked={useCoin} 
-                        onChange={toggleUseCoin}
-                        className="ml-2 form-checkbox h-5 w-5 text-[#B86A4B] rounded" 
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-lg text-[#B86A4B]">
-                    <span>คูปองส่วนลดจาก KUMA ま</span>
-                    <span className="underline cursor-pointer" onClick={handleCouponClick}>กดใช้คูปอง</span>
-                  </div>
-                  
-                  {/* ช่องใส่คูปอง */}
-                  {showCouponInput && (
-                    <div className="mt-2">
-                      <div className="flex">
-                        <input
-                          type="text"
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value)}
-                          placeholder="ใส่รหัสคูปอง"
-                          className="border border-gray-300 rounded-l-lg px-3 py-2 w-full"
-                        />
-                        <button 
-                          className="bg-[#D6A985] text-white px-4 py-2 rounded-r-lg hover:bg-[#B86A4B] transition-colors"
-                        >
-                          ใช้คูปอง
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  </div>                  
                 </div>
                 
                 <div className="border-t border-gray-100 pt-4">
                   <div className="flex justify-between font-bold text-xl mb-6">
-                    <span className="text-[#5F6368]">ยอดสั่งซื้อ</span>
+                    <span className="text-[#5F6368]">ยอดสั่งซื้อสุทธิ</span>
                     <span className="text-[#5F6368]">฿{grandTotal}</span>
                   </div>
                   
